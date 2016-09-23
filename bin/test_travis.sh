@@ -54,6 +54,9 @@ fi
 if [[ "${WITH_PIRANHA}" != "" ]]; then
     cmake_line="$cmake_line -DWITH_PIRANHA=${WITH_PIRANHA}"
 fi
+if [[ "${WITH_FLINT}" != "" ]]; then
+    cmake_line="$cmake_line -DWITH_FLINT=${WITH_FLINT}"
+fi
 if [[ "${WITH_BENCHMARKS_NONIUS}" != "" ]]; then
     cmake_line="$cmake_line -DBUILD_BENCHMARKS_NONIUS=${WITH_BENCHMARKS_NONIUS}"
 fi
@@ -74,9 +77,9 @@ if [[ "${WITH_COVERAGE}" != "" ]]; then
 fi
 
 if [[ "${CC}" == "clang"* ]] && [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
-    CXXFLAGS=""
+    export CXXFLAGS=""
 else
-    CXXFLAGS="-Werror"
+    export CXXFLAGS="-Werror"
 fi
 cmake $cmake_line ${SOURCE_DIR}
 
@@ -113,12 +116,3 @@ export LD_LIBRARY_PATH=$our_install_dir/lib:$LD_LIBRARY_PATH
 
 echo "Checking whether all header files are installed:"
 python $SOURCE_DIR/symengine/utilities/tests/test_make_install.py $our_install_dir/include/symengine/ $SOURCE_DIR/symengine
-
-# check trailing whitespace:
-if !  egrep " $" -nr --include=\*.{cpp,h,inc}  --exclude-dir=*{teuchos,/build/}* $SOURCE_DIR ; then
-    echo No trailing whitespace;
-else
-    exit -1;
-fi
-# TODO: Add similar grep checks for space after comma,, space after `if`, space between `)` and `{` also
-

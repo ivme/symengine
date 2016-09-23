@@ -28,6 +28,18 @@ SymEngine mailinglist: http://groups.google.com/group/symengine
 
 ## Installation
 
+### Ubuntu package manager
+
+    add-apt-repository ppa:symengine/ppa
+    apt-get update
+    apt-get install libsymengine-dev
+
+### Conda package manager
+
+    conda install symengine -c symengine -c conda-forge
+
+### Building from source
+
 Install prerequisites.
 For Debian based systems (Ubuntu etc.):
 
@@ -41,9 +53,10 @@ Install SymEngine:
 
     cmake .
     make
+    make install
 
 This will configure and build SymEngine in the default Release mode with all
-code and compiler optimizations on.
+code and compiler optimizations on and then install it on your system.
 
 Run tests:
 
@@ -104,8 +117,10 @@ their default values indicated below:
         -DBUILD_TESTS:BOOL=ON \                       # Build with tests
         -DBUILD_BENCHMARKS:BOOL=ON \                  # Build with benchmarks
         -DBUILD_BENCHMARKS_NONIUS:BOOL=OFF \          # Build with Nonius benchmarks
-        -DINTEGER_CLASS:STRING=gmpxx \                # Choose storage type for Integer. one of gmp, gmpxx, 
+        -DINTEGER_CLASS:STRING=gmp \                  # Choose storage type for Integer. one of gmp, gmpxx,
                                                         flint, piranha
+        -DBUILD_SHARED_LIBS:BOOL=OFF \                # Build a shared library.
+        -DCMAKE_INSTALL_RPATH_USE_LINK_PATH:BOOL=OFF\ # Add dependencies to rpath when a shared lib is built
         .
 
 If `OPENMP` is enabled, then `SYMENGINE_THREAD_SAFE` is also enabled automatically
@@ -129,21 +144,16 @@ which is the default).
 
 ### External Libraries
 
-There are three ways how to specify where external libraries are. In the lines
-below, change `PKG1`, `PKG2`, ... to the names of the external libraries
-(`GMP`, `ARB`, `PRIMESIEVE`, `BFD`, `FLINT`, `MPFR`, ...).
+Use `CMAKE_PREFIX_PATH` to specify the prefixes of the external libraries.
 
-1. `cmake -DCMAKE_PREFIX_PATH=$HASHSTACK .`
-2. `cmake -DPKG1_INCLUDE_DIRS=$HASHSTACK/include -DPKG1_LIBRARIES=$HASHSTACK/lib .`
+    cmake -DCMAKE_PREFIX_PATH=<prefix1>;<prefix2>
 
-In the approach 1., you specify a common prefix(es) for all libraries at once.
-Use specific prefix first and general later. In the approach 2., you specify
-the include and library directories separately (you can use approach 1. for
-some libraries and 2. for other libraries on the same command line).
+If the headers and libs are not in `<prefix>/include` and `<prefix>/lib` respectively,
+use `CMAKE_LIBRARY_PATH` and `CMAKE_INCLUDE_PATH`.
 
-If all your libraries are installed in the same prefix, use 1. If they are
-installed in separate locations, use 1. or 2.: if the given library has a
-common prefix for includes and libs, use 1., otherwise use 2.
+If CMake still cannot find the library, you can specify the path to the library by
+doing `cmake -DPKG_LIBRARY=/path/libname.so .`, where `PKG` should be replaced
+with the name of the external library (`GMP`, `ARB`, `BFD`, `FLINT`, `MPFR`, ...).
 
 ## Developer Documentation
 

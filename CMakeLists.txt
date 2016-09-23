@@ -4,7 +4,7 @@ set(CMAKE_USER_MAKE_RULES_OVERRIDE ${CMAKE_SOURCE_DIR}/cmake/UserOverride.cmake)
 
 project(symengine)
 set(SYMENGINE_MAJOR_VERSION 0)
-set(SYMENGINE_MINOR_VERSION 1)
+set(SYMENGINE_MINOR_VERSION 2)
 set(SYMENGINE_PATCH_VERSION 0)
 set(SYMENGINE_VERSION ${SYMENGINE_MAJOR_VERSION}.${SYMENGINE_MINOR_VERSION}.${SYMENGINE_PATCH_VERSION})
 
@@ -21,18 +21,18 @@ if (NOT (CMAKE_BUILD_TYPE STREQUAL "Debug" OR
     message(FATAL_ERROR "CMAKE_BUILD_TYPE must be one of: Debug, Release (current value: '${CMAKE_BUILD_TYPE}')")
 endif ()
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set(CMAKE_CXX_FLAGS_DEBUG
-        "${CMAKE_CXX_FLAGS_DEBUG} -Wno-unused-parameter -ggdb")
-    set(CMAKE_CXX_FLAGS_RELEASE
-        "${CMAKE_CXX_FLAGS_RELEASE} -Wno-unused-parameter")
-endif()
+set(BUILD_FOR_DISTRIBUTION no
+    CACHE BOOL "Building SymEngine for a distribution")
 
-if (CMAKE_CXX_COMPILER_ID MATCHES Clang)
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     set(CMAKE_CXX_FLAGS_DEBUG
         "${CMAKE_CXX_FLAGS_DEBUG} -Wno-unused-parameter -ggdb")
     set(CMAKE_CXX_FLAGS_RELEASE
         "${CMAKE_CXX_FLAGS_RELEASE} -Wno-unused-parameter")
+    if (NOT BUILD_FOR_DISTRIBUTION)
+        set(CMAKE_CXX_FLAGS_RELEASE
+            "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
+    endif()
 endif()
 
 # Check c++11 support
@@ -72,13 +72,6 @@ if (MSVC)
     set(HAVE_DEFAULT_CONSTRUCTORS no)
 endif()
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-    set(HAVE_DEFAULT_CONSTRUCTORS no)
-    set(HAVE_SYMENGINE_NOEXCEPT no)
-    set(HAVE_SYMENGINE_IS_CONSTRUCTIBLE no)
-    set(HAVE_SYMENGINE_RESERVE no)
-endif()
-
 if (CMAKE_CXX_COMPILER_ID STREQUAL "PGI")
     set(HAVE_DEFAULT_CONSTRUCTORS no)
     set(HAVE_SYMENGINE_RESERVE no)
@@ -91,9 +84,16 @@ if ((CMAKE_CXX_COMPILER_ID MATCHES Clang) AND (CMAKE_BUILD_TYPE STREQUAL "Releas
     endif()
 endif()
 
+# Cotire
+if ((CMAKE_VERSION VERSION_GREATER 2.8.11) AND
+    (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU|MSVC"))
+    set(WITH_COTIRE yes CACHE BOOL "Use cotire to speed up build")
+else()
+    set(WITH_COTIRE no CACHE BOOL "Use cotire to speed up build")
+endif()
 
-set(INTEGER_CLASS "gmpxx"
-    CACHE STRING "Integer class for symengine. Either gmpxx or piranha")
+set(INTEGER_CLASS "gmp"
+    CACHE STRING "Integer class for symengine. Either gmp, gmpxx, flint or piranha")
 
 # Piranha
 set(WITH_PIRANHA no CACHE BOOL "Build with Piranha")
@@ -109,8 +109,13 @@ elseif ("${INTEGER_CLASS}" MATCHES "flint")
     set(SYMENGINE_INTEGER_CLASS "FLINT")
     set(WITH_FLINT yes)
 elseif ("${INTEGER_CLASS}" MATCHES "gmpxx")
-    set(SYMENGINE_INTEGER_CLASS "GMPXX")
-    set(WITH_GMPXX yes)
+    if (WITH_PIRANHA)
+        message(WARNING "SymEngine can't be built with both INTEGER_CLASS=gmpxx and WITH_PIRANHA=yes")
+        set(SYMENGINE_INTEGER_CLASS "GMP")
+    else()
+        set(SYMENGINE_INTEGER_CLASS "GMPXX")
+        set(WITH_GMPXX yes)
+    endif()
 else()
     set(SYMENGINE_INTEGER_CLASS "GMP")
 endif()
@@ -133,6 +138,34 @@ if (NOT(MSVC) AND WITH_GMPXX)
             "Recompile GMP with C++ support using ${CMAKE_CXX_COMPILER}, remove CMakeCache.txt and try again.\n"
             "Error Log : \n${GMPXX_ERROR_LOG}")
     endif()
+endif()
+
+set(MSVC_USE_MT yes CACHE BOOL "Use MT flags when compiling in MSVC")
+set(MSVC_WARNING_LEVEL 1 CACHE STRING "MSVC warning level")
+
+if (MSVC)
+    if (MSVC_USE_MT)
+	    foreach(CompilerFlag CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE)
+	      string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
+	    endforeach()
+    endif()
+    foreach(CompilerFlag CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE)
+      set(${CompilerFlag} "${${CompilerFlag}} /W${MSVC_WARNING_LEVEL}")
+    endforeach()
+endif()
+
+if (BUILD_SHARED_LIBS)
+    if (WIN32)
+        if (MSVC)
+            # Use CMake 3.4 feature
+            set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS yes)
+        else()
+            set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--export-all-symbols")
+        endif()
+    endif()
+    set(SYMENGINE_STATIC_DEFINE no)
+else()
+    set(SYMENGINE_STATIC_DEFINE yes)
 endif()
 
 # ECM
@@ -364,6 +397,11 @@ if (WITH_OPENMP)
             "${CMAKE_CXX_FLAGS_RELEASE} ${OpenMP_CXX_FLAGS}")
         set(WITH_SYMENGINE_THREAD_SAFE yes)
     endif()
+elseif (CMAKE_CXX_COMPILER_ID MATCHES Clang|GNU)
+    set(CMAKE_CXX_FLAGS_DEBUG
+        "${CMAKE_CXX_FLAGS_DEBUG} -Wno-unknown-pragmas")
+    set(CMAKE_CXX_FLAGS_RELEASE
+        "${CMAKE_CXX_FLAGS_RELEASE} -Wno-unknown-pragmas")
 endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -438,21 +476,21 @@ configure_file(cmake/SymEngineConfigVersion.cmake.in SymEngineConfigVersion.cmak
 
 install(FILES "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/SymEngineConfig.cmake"
               ${PROJECT_BINARY_DIR}/SymEngineConfigVersion.cmake
-              cmake/FindFLINT.cmake
-              cmake/FindARB.cmake
-              cmake/FindBFD.cmake
-              cmake/FindECM.cmake
-              cmake/FindEXECINFO.cmake
-              cmake/FindFLINT.cmake
-              cmake/FindGMP.cmake
-              cmake/FindLINKH.cmake
-              cmake/FindMPC.cmake
-              cmake/FindMPFR.cmake
-              cmake/FindPIRANHA.cmake
-              cmake/FindPRIMESIEVE.cmake
-              cmake/FindPTHREAD.cmake
-              cmake/FindTCMALLOC.cmake
-              cmake/LibFindMacros.cmake
+              #cmake/FindFLINT.cmake
+              #cmake/FindARB.cmake
+              #cmake/FindBFD.cmake
+              #cmake/FindECM.cmake
+              #cmake/FindEXECINFO.cmake
+              #cmake/FindFLINT.cmake
+              #cmake/FindGMP.cmake
+              #cmake/FindLINKH.cmake
+              #cmake/FindMPC.cmake
+              #cmake/FindMPFR.cmake
+              #cmake/FindPIRANHA.cmake
+              #cmake/FindPRIMESIEVE.cmake
+              #cmake/FindPTHREAD.cmake
+              #cmake/FindTCMALLOC.cmake
+              #cmake/LibFindMacros.cmake
         DESTINATION ${INSTALL_CMAKE_DIR})
 install(EXPORT SymEngineTargets DESTINATION ${INSTALL_CMAKE_DIR})
 
@@ -477,6 +515,7 @@ message("CMAKE_CONFIGURATION_TYPES: ${CMAKE_CONFIGURATION_TYPES}")
 message("CMAKE_CXX_FLAGS_DEBUG:   ${CMAKE_CXX_FLAGS_DEBUG}")
 message("CMAKE_CXX_FLAGS_RELEASE: ${CMAKE_CXX_FLAGS_RELEASE}")
 message("CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
+message("BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}")
 
 message("INTEGER_CLASS : ${SYMENGINE_INTEGER_CLASS}")
 message("WITH_SYMENGINE_ASSERT: ${WITH_SYMENGINE_ASSERT}")
@@ -486,6 +525,7 @@ if (NOT WITH_SYMENGINE_RCP)
     message("HAVE_TEUCHOS_DEBUG: ${HAVE_TEUCHOS_DEBUG}")
     message("HAVE_TEUCHOS_DEBUG_RCP_NODE_TRACING: ${HAVE_TEUCHOS_DEBUG_RCP_NODE_TRACING}")
 endif ()
+message("WITH_COTIRE: ${WITH_COTIRE}")
 message("HAVE_GCC_ABI_DEMANGLE: ${HAVE_GCC_ABI_DEMANGLE}")
 message("HAVE_C_FUNCTION_NOT_FUNC: ${HAVE_C_FUNCTION_NOT_FUNC}")
 message("HAVE_DEFAULT_CONSTRUCTORS: ${HAVE_DEFAULT_CONSTRUCTORS}")

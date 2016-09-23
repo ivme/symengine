@@ -1,18 +1,10 @@
 #include "catch.hpp"
 
-#include <symengine/basic.h>
-#include <symengine/add.h>
-#include <symengine/symbol.h>
-#include <symengine/dict.h>
-#include <symengine/integer.h>
-#include <symengine/rational.h>
-#include <symengine/complex.h>
-#include <symengine/mul.h>
-#include <symengine/pow.h>
-#include <symengine/functions.h>
 #include <symengine/visitor.h>
 #include <symengine/eval_double.h>
 #include <symengine/parser.h>
+#include <symengine/polys/basic_conversions.h>
+#include <symengine/symengine_exception.h>
 
 using SymEngine::Basic;
 using SymEngine::Add;
@@ -42,6 +34,11 @@ using SymEngine::max;
 using SymEngine::min;
 using SymEngine::loggamma;
 using SymEngine::gamma;
+using SymEngine::UIntPoly;
+using SymEngine::from_basic;
+using SymEngine::ParseError;
+
+using namespace SymEngine::literals;
 
 TEST_CASE("Parsing: integers, basic operations", "[parser]")
 {
@@ -95,6 +92,29 @@ TEST_CASE("Parsing: integers, basic operations", "[parser]")
     s = "(1+2*(3+1)-5/(2+2))";
     res = parse(s);
     REQUIRE(eq(*res, *add(integer(9), div(integer(-5), integer(4)))));
+
+    s = "2 + -3";
+    res = parse(s);
+    REQUIRE(eq(*res, *integer(-1)));
+
+    s = "10000000000000000000000000";
+    res = parse(s);
+    REQUIRE(eq(*res, *pow(integer(10), integer(25))));
+
+    // Make sure that parsing and printing works correctly
+    s = "0.123123123e-10";
+    res = parse(s);
+    REQUIRE(eq(*res, *parse(res->__str__())));
+
+    s = "123123123123123.";
+    res = parse(s);
+    REQUIRE(eq(*res, *parse(res->__str__())));
+
+#ifdef HAVE_SYMENGINE_MPFR
+    s = "1.231231232123123123123123123123e8";
+    res = parse(s);
+    REQUIRE(eq(*res, *parse(res->__str__())));
+#endif
 }
 
 TEST_CASE("Parsing: symbols", "[parser]")
@@ -112,7 +132,7 @@ TEST_CASE("Parsing: symbols", "[parser]")
 
     s = "w1*y";
     res = parse(s);
-    REQUIRE(eq(*res, *mul(w ,y)));
+    REQUIRE(eq(*res, *mul(w, y)));
 
     s = "x**(3+w1)-2/y";
     res = parse(s);
@@ -137,6 +157,18 @@ TEST_CASE("Parsing: symbols", "[parser]")
     s = "y/x*x";
     res = parse(s);
     REQUIRE(eq(*res, *y));
+
+    s = "x * -y";
+    res = parse(s);
+    REQUIRE(eq(*res, *mul(x, mul(y, integer(-1)))));
+
+    s = "x ^ --y";
+    res = parse(s);
+    REQUIRE(eq(*res, *pow(x, y)));
+
+    s = "x**2e-1+3e+2-2e-2";
+    res = parse(s);
+    REQUIRE(eq(*res, *add(real_double(299.98), pow(x, real_double(0.2)))));
 }
 
 TEST_CASE("Parsing: functions", "[parser]")
@@ -158,9 +190,9 @@ TEST_CASE("Parsing: functions", "[parser]")
     res = parse(s);
     REQUIRE(eq(*res, *asin(sin(x))));
 
-    s = "beta(x,y)";
+    s = "beta(x, y)";
     res = parse(s);
-    REQUIRE(eq(*res, *beta(x,y)));
+    REQUIRE(eq(*res, *beta(x, y)));
 
     s = "erf(erf(x*y)) + y";
     res = parse(s);
@@ -168,15 +200,18 @@ TEST_CASE("Parsing: functions", "[parser]")
 
     s = "beta(sin(x+3), gamma(2^y+sin(y)))";
     res = parse(s);
-    REQUIRE(eq(*res, *beta(sin(add(x, integer(3))), gamma(add(sin(y), pow(integer(2), y))))));
+    REQUIRE(eq(*res, *beta(sin(add(x, integer(3))),
+                           gamma(add(sin(y), pow(integer(2), y))))));
 
     s = "y^(abs(sin(3) + x)) + sinh(2)";
     res = parse(s);
-    REQUIRE(eq(*res, *add(pow(y, abs(add(sin(integer(3)), x))), sinh(integer(2)))));
+    REQUIRE(
+        eq(*res, *add(pow(y, abs(add(sin(integer(3)), x))), sinh(integer(2)))));
 
     s = "2 + zeta(2, x) + zeta(ln(3))";
     res = parse(s);
-    REQUIRE(eq(*res, *add(integer(2), add(zeta(integer(2), x), zeta(log(integer(3)))))));
+    REQUIRE(eq(*res, *add(integer(2),
+                          add(zeta(integer(2), x), zeta(log(integer(3)))))));
 
     s = "sin(asin(x)) + y";
     res = parse(s);
@@ -231,7 +266,8 @@ TEST_CASE("Parsing: constants", "[parser]")
 
     s = "(3+4*I)/(5+cos(pi/2)*I)";
     res = parse(s);
-    REQUIRE(eq(*res, *div(Complex::from_two_nums(*integer(3), *integer(4)), integer(5))));
+    REQUIRE(eq(*res, *div(Complex::from_two_nums(*integer(3), *integer(4)),
+                          integer(5))));
 
     s = "(2*I +6*I)*3*I + 4*I";
     res = parse(s);
@@ -252,15 +288,18 @@ TEST_CASE("Parsing: function_symbols", "[parser]")
 
     s = "my_func(x, wt) + sin(f(y))";
     res = parse(s);
-    REQUIRE(eq(*res, *add(function_symbol("my_func", {x, z}), sin(function_symbol("f", y)))));
+    REQUIRE(eq(*res, *add(function_symbol("my_func", {x, z}),
+                          sin(function_symbol("f", y)))));
 
     s = "func(x, y, wt) + f(sin(x))";
     res = parse(s);
-    REQUIRE(eq(*res, *add(function_symbol("func", {x, y, z}), function_symbol("f", sin(x)))));
+    REQUIRE(eq(*res, *add(function_symbol("func", {x, y, z}),
+                          function_symbol("f", sin(x)))));
 
     s = "f(g(2^x))";
     res = parse(s);
-    REQUIRE(eq(*res, *function_symbol("f", function_symbol("g", pow(integer(2), x)))));
+    REQUIRE(eq(
+        *res, *function_symbol("f", function_symbol("g", pow(integer(2), x)))));
 }
 
 TEST_CASE("Parsing: doubles", "[parser]")
@@ -288,7 +327,40 @@ TEST_CASE("Parsing: doubles", "[parser]")
     res = parse(s);
     REQUIRE(is_a<RealDouble>(*res));
     d = static_cast<const RealDouble &>(*res).as_double();
-    REQUIRE(std::abs(d - (::sqrt(2)+5)) < 1e-12);
+    REQUIRE(std::abs(d - (::sqrt(2) + 5)) < 1e-12);
+}
+
+TEST_CASE("Parsing: polys", "[parser]")
+{
+    std::string s;
+    RCP<const UIntPoly> poly1, poly2, poly3, poly4;
+    RCP<const Basic> x = symbol("x");
+
+    s = "x + 2*x**2 + 1";
+    poly1 = from_basic<UIntPoly>(parse(s));
+    poly2 = UIntPoly::from_vec(x, {{1_z, 1_z, 2_z}});
+    REQUIRE(eq(*poly1, *poly2));
+
+    s = "2*(x+1)**10 + 3*(x+2)**5";
+    poly1 = from_basic<UIntPoly>(parse(s));
+    poly2 = pow_upoly(*UIntPoly::from_vec(x, {{1_z, 1_z}}), 10);
+    poly3 = UIntPoly::from_vec(x, {{2_z}});
+    poly2 = mul_upoly(*poly2, *poly3);
+    poly3 = pow_upoly(*UIntPoly::from_vec(x, {{2_z, 1_z}}), 5);
+    poly4 = UIntPoly::from_vec(x, {{3_z}});
+    poly3 = mul_upoly(*poly4, *poly3);
+    poly2 = add_upoly(*poly2, *poly3);
+    REQUIRE(eq(*poly1, *poly2));
+
+    s = "((x+1)**5)*(x+2)*(2*x + 1)**3";
+    poly1 = from_basic<UIntPoly>(parse(s));
+
+    poly2 = pow_upoly(*UIntPoly::from_vec(x, {{1_z, 1_z}}), 5);
+    poly3 = UIntPoly::from_vec(x, {{2_z, 1_z}});
+    poly2 = mul_upoly(*poly2, *poly3);
+    poly3 = pow_upoly(*UIntPoly::from_vec(x, {{1_z, 2_z}}), 3);
+    poly2 = mul_upoly(*poly2, *poly3);
+    REQUIRE(eq(*poly1, *poly2));
 }
 
 TEST_CASE("Parsing: errors", "[parser]")
@@ -296,23 +368,23 @@ TEST_CASE("Parsing: errors", "[parser]")
     std::string s;
 
     s = "x+y+";
-    CHECK_THROWS_AS(parse(s), std::runtime_error);
+    CHECK_THROWS_AS(parse(s), ParseError);
 
     s = "x + (y))";
-    CHECK_THROWS_AS(parse(s), std::runtime_error);
+    CHECK_THROWS_AS(parse(s), ParseError);
 
     s = "x + max((3, 2+1)";
-    CHECK_THROWS_AS(parse(s), std::runtime_error);
+    CHECK_THROWS_AS(parse(s), ParseError);
 
     s = "2..33 + 2";
-    CHECK_THROWS_AS(parse(s), std::runtime_error);
-
-    s = "2 +- 3";
-    CHECK_THROWS_AS(parse(s), std::runtime_error);
+    CHECK_THROWS_AS(parse(s), ParseError);
 
     s = "(2)(3)";
-    CHECK_THROWS_AS(parse(s), std::runtime_error);
+    CHECK_THROWS_AS(parse(s), ParseError);
+
+    s = "sin(x y)";
+    CHECK_THROWS_AS(parse(s), ParseError);
 
     s = "max(,3,2)";
-    CHECK_THROWS_AS(parse(s), std::runtime_error);
+    CHECK_THROWS_AS(parse(s), ParseError);
 }

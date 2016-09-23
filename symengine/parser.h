@@ -2,11 +2,11 @@
 #define SYMENGINE_PARSER_H
 
 #include <symengine/basic.h>
-#include <symengine/dict.h>
 
-namespace SymEngine {
+namespace SymEngine
+{
 
-RCP<const Basic> parse(const std::string& s);
+RCP<const Basic> parse(const std::string &s);
 
 } // SymEngine
 

@@ -10,6 +10,10 @@ SymEngineConfig.cmake
 SymEngineConfigVersion.cmake
 SymEngineTargets.cmake
 
+# cotire
+symengine/cotire
+symengine/symengine_CXX_cotire.cmake
+
 # Compiled Object Files, Static/Dynamic Libraries
 *.so
 *.a
@@ -33,6 +37,7 @@ doc/html
 
 # Config Files
 symengine/symengine_config.h
+symengine/symengine_export.h
 symengine/utilities/teuchos/Teuchos_config.h
 symengine/python/symengine/lib/config.pxi
 
@@ -72,10 +77,28 @@ symengine/tests/eval/test_eval_double
 symengine/tests/eval/test_eval_arb
 symengine/tests/eval/test_eval_mpfr
 symengine/tests/eval/test_eval_mpc
+symengine/tests/eval/test_evalf
 symengine/tests/eval/test_lambda_double
 symengine/tests/expression/test_expression
 symengine/tests/basic/test_series_expansion_UP
 symengine/tests/basic/test_series_expansion_URatP
+symengine/tests/basic/test_series_expansion_URatF
+symengine/tests/basic/test_polynomial_multivariate
+symengine/tests/polynomial/test_mexprpoly
+symengine/tests/polynomial/test_mintpoly
+symengine/tests/polynomial/test_uexprpoly
+symengine/tests/polynomial/test_uintpoly
+symengine/tests/polynomial/test_uratpoly
+symengine/tests/polynomial/test_uintpoly_flint
+symengine/tests/polynomial/test_uratpoly_flint
+symengine/tests/polynomial/test_uintpoly_piranha
+symengine/tests/polynomial/test_uratpoly_piranha
+symengine/tests/polynomial/test_basic_conversions
+symengine/tests/basic/test_fields
+symengine/tests/basic/test_infinity
+symengine/tests/logic/test_logic
+symengine/tests/printing/test_ccode
+symengine/tests/finitediff/test_finitediff
 symengine/tests/chad/test_rings
 
 # Benchmarks executables
@@ -100,11 +123,14 @@ benchmarks/symbench_ginac
 benchmarks/lwbench
 benchmarks/lwbench_ginac
 benchmarks/expand6
+benchmarks/expand6b
 benchmarks/expand6_ginac
+benchmarks/expand6b_ginac
 benchmarks/expand7
 benchmarks/expand7_ginac
 benchmarks/series_expansion_sincos_piranha
 benchmarks/series_expansion_sinp
+benchmarks/series_expansion_sincos_flint
 
 #rubygem
 symengine/ruby/Gemfile.lock

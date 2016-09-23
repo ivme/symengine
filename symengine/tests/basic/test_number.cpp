@@ -1,15 +1,11 @@
 #include "catch.hpp"
-#include <symengine/integer.h>
-#include <symengine/real_mpfr.h>
 #include <symengine/complex_mpc.h>
-#include <symengine/real_double.h>
-#include <symengine/complex_double.h>
-#include <symengine/rational.h>
-#include <symengine/complex.h>
 #include <symengine/functions.h>
 #include <symengine/add.h>
 #include <symengine/eval_double.h>
+#include <symengine/symengine_exception.h>
 
+using SymEngine::SymEngineException;
 using SymEngine::print_stack_on_segfault;
 using SymEngine::RCP;
 using SymEngine::Integer;
@@ -29,6 +25,7 @@ using SymEngine::add;
 using SymEngine::eval_double;
 using SymEngine::integer_class;
 using SymEngine::rational_class;
+using SymEngine::hash_t;
 #ifdef HAVE_SYMENGINE_MPFR
 using SymEngine::mpfr_class;
 using SymEngine::real_mpfr;
@@ -75,11 +72,11 @@ TEST_CASE("RealMPFR: arithmetic", "[number]")
     REQUIRE(is_a<ComplexMPC>(*pownum(r5, half)));
     REQUIRE(is_a<ComplexMPC>(*pownum(integer(-2), r5)));
 #else
-    CHECK_THROWS_AS(addnum(r1, c1), std::runtime_error);
-    CHECK_THROWS_AS(pownum(r5, half), std::runtime_error);
-    CHECK_THROWS_AS(pownum(integer(-2), r1), std::runtime_error);
-#endif //HAVE_SYMENGINE_MPC
-#endif //HAVE_SYMENGINE_MPFR
+    CHECK_THROWS_AS(addnum(r1, c1), SymEngineException);
+    CHECK_THROWS_AS(pownum(r5, half), SymEngineException);
+    CHECK_THROWS_AS(pownum(integer(-2), r1), SymEngineException);
+#endif // HAVE_SYMENGINE_MPC
+#endif // HAVE_SYMENGINE_MPFR
 }
 
 TEST_CASE("ComplexMPC: arithmetic", "[number]")
@@ -113,7 +110,7 @@ TEST_CASE("ComplexMPC: arithmetic", "[number]")
     REQUIRE(eq(*r4, *pownum(i2, r1)));
     REQUIRE(eq(*r1, *pownum(r3, half)));
     REQUIRE(eq(*divnum(i1, r4), *half->pow(*r1)));
-#endif //HAVE_SYMENGINE_MPC
+#endif // HAVE_SYMENGINE_MPC
 }
 
 TEST_CASE("Test is_exact", "[number]")
@@ -197,74 +194,107 @@ TEST_CASE("Test is_exact", "[number]")
     REQUIRE(not n1->is_exact_zero());
     REQUIRE(not n1->is_negative());
     REQUIRE(not n1->is_positive());
-#endif //HAVE_SYMENGINE_MPC
-#endif //HAVE_SYMENGINE_MPFR
+#endif // HAVE_SYMENGINE_MPC
+#endif // HAVE_SYMENGINE_MPFR
 }
 
 TEST_CASE("Test NumberWrapper", "[number]")
 {
-    class Long : public NumberWrapper {
+    class Long : public NumberWrapper
+    {
     public:
         long i_;
-        Long(long i) : i_(i) {
-
+        Long(long i) : i_(i)
+        {
         }
 
-        virtual std::string __str__() const {
+        virtual std::string __str__() const
+        {
             std::stringstream ss;
             ss << i_;
             return ss.str();
         };
-        virtual RCP<const Number> eval(long bits) const {
-            return integer(std::move(integer_class(i_)));
+        virtual RCP<const Number> eval(long bits) const
+        {
+            return integer(integer_class(i_));
         };
-        long number_to_long(const Number &x) const {
+        long number_to_long(const Number &x) const
+        {
             long l;
             std::istringstream ss(x.__str__());
             ss >> l;
             return l;
         }
-        virtual RCP<const Number> add(const Number &x) const {
+        virtual RCP<const Number> add(const Number &x) const
+        {
             return make_rcp<Long>(i_ + number_to_long(x));
         }
-        virtual RCP<const Number> sub(const Number &x) const {
+        virtual RCP<const Number> sub(const Number &x) const
+        {
             return make_rcp<Long>(i_ - number_to_long(x));
         }
-        virtual RCP<const Number> rsub(const Number &x) const {
+        virtual RCP<const Number> rsub(const Number &x) const
+        {
             return make_rcp<Long>(-i_ + number_to_long(x));
         }
-        virtual RCP<const Number> mul(const Number &x) const {
+        virtual RCP<const Number> mul(const Number &x) const
+        {
             return make_rcp<Long>(i_ * number_to_long(x));
         }
-        virtual RCP<const Number> div(const Number &x) const {
+        virtual RCP<const Number> div(const Number &x) const
+        {
             return make_rcp<Long>(i_ / number_to_long(x));
         }
-        virtual RCP<const Number> rdiv(const Number &x) const {
+        virtual RCP<const Number> rdiv(const Number &x) const
+        {
             return make_rcp<Long>(number_to_long(x) / i_);
         }
-        virtual RCP<const Number> pow(const Number &x) const {
+        virtual RCP<const Number> pow(const Number &x) const
+        {
             return make_rcp<Long>(std::pow(i_, number_to_long(x)));
         }
-        virtual RCP<const Number> rpow(const Number &x) const {
+        virtual RCP<const Number> rpow(const Number &x) const
+        {
             return make_rcp<Long>(std::pow(number_to_long(x), i_));
         }
-        virtual bool is_zero() const { return i_ == 0; }
+        virtual bool is_zero() const
+        {
+            return i_ == 0;
+        }
         //! \return true if `1`
-        virtual bool is_one() const { return i_ == 1; }
+        virtual bool is_one() const
+        {
+            return i_ == 1;
+        }
         //! \return true if `-1`
-        virtual bool is_minus_one() const { return i_ == -1; }
+        virtual bool is_minus_one() const
+        {
+            return i_ == -1;
+        }
         //! \return true if negative
-        virtual bool is_negative() const { return i_ < 0; }
+        virtual bool is_negative() const
+        {
+            return i_ < 0;
+        }
         //! \return true if positive
-        virtual bool is_positive() const { return i_ > 0; }
-        virtual std::size_t __hash__() const { return i_; };
+        virtual bool is_positive() const
+        {
+            return i_ > 0;
+        }
+        virtual hash_t __hash__() const
+        {
+            return i_;
+        };
         //! true if `this` is equal to `o`.
-        virtual bool __eq__(const Basic &o) const {
+        virtual bool __eq__(const Basic &o) const
+        {
             return i_ == static_cast<const Long &>(o).i_;
         };
-        virtual int compare(const Basic &o) const {
+        virtual int compare(const Basic &o) const
+        {
             long j = static_cast<const Long &>(o).i_;
-            if (i_ == j) return 0;
+            if (i_ == j)
+                return 0;
             return i_ > j ? 1 : -1;
         };
     };

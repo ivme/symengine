@@ -1,20 +1,18 @@
-#include <symengine/constants.h>
 #include <symengine/complex.h>
-#include <symengine/functions.h>
-#include <symengine/mul.h>
 #include <symengine/add.h>
+#include <symengine/infinity.h>
 #include <symengine/pow.h>
 
-namespace SymEngine {
+namespace SymEngine
+{
 
-Constant::Constant(const std::string &name)
-    : name_{name}
+Constant::Constant(const std::string &name) : name_{name}
 {
 }
 
-std::size_t Constant::__hash__() const
+hash_t Constant::__hash__() const
 {
-    std::size_t seed = CONSTANT;
+    hash_t seed = CONSTANT;
     hash_combine<std::string>(seed, name_);
     return seed;
 }
@@ -30,7 +28,8 @@ int Constant::compare(const Basic &o) const
 {
     SYMENGINE_ASSERT(is_a<Constant>(o))
     const Constant &s = static_cast<const Constant &>(o);
-    if (name_ == s.name_) return 0;
+    if (name_ == s.name_)
+        return 0;
     return name_ < s.name_ ? -1 : 1;
 }
 
@@ -43,18 +42,22 @@ RCP<const Constant> pi = constant("pi");
 RCP<const Constant> E = constant("E");
 RCP<const Constant> EulerGamma = constant("EulerGamma");
 
+RCP<const Infty> Inf = Infty::from_int(1);
+RCP<const Infty> NegInf = Infty::from_int(-1);
+RCP<const Infty> ComplexInf = Infty::from_int(0);
+
 // Global variables declared in functions.cpp
 // Look over https://github.com/sympy/symengine/issues/272
 // for further details
 RCP<const Basic> i2 = integer(2);
 
-namespace {
-RCP<const Basic> sqrt_(const RCP<const Basic>& arg)
+namespace
+{
+RCP<const Basic> sqrt_(const RCP<const Basic> &arg)
 {
     return pow(arg, div(one, i2));
 }
 }
-
 
 RCP<const Basic> i3 = integer(3);
 RCP<const Basic> i5 = integer(5);
@@ -82,11 +85,10 @@ RCP<const Basic> mC4 = mul(minus_one, C4);
 RCP<const Basic> mC5 = mul(minus_one, C5);
 RCP<const Basic> mC6 = mul(minus_one, C6);
 
-// sin_table[n] represents the value of sin(2*pi*n/24) for n = 0..23
-RCP<const Basic> sin_table[] = {
-        zero, C0, C1, C2, C3, C4, one, C4, C3, C2, C1, C0,
-        zero, mC0, mC1, mC2, mC3, mC4, minus_one, mC4, mC3, mC2, mC1, mC0
-    };
+// sin_table[n] represents the value of sin(pi*n/12) for n = 0..23
+RCP<const Basic> sin_table[]
+    = {zero, C0,  C1,  C2,  C3,  C4,  one,       C4,  C3,  C2,  C1,  C0,
+       zero, mC0, mC1, mC2, mC3, mC4, minus_one, mC4, mC3, mC2, mC1, mC0};
 
 umap_basic_basic inverse_cst = {
     {C3, i3},

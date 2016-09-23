@@ -8,9 +8,11 @@
 
 #include <symengine/basic.h>
 
-namespace SymEngine {
+namespace SymEngine
+{
 
-class Symbol : public Basic {
+class Symbol : public Basic
+{
 private:
     //! name of Symbol
     std::string name_;
@@ -20,7 +22,7 @@ public:
     //! Symbol Constructor
     explicit Symbol(const std::string &name);
     //! \return Size of the hash
-    virtual std::size_t __hash__() const;
+    virtual hash_t __hash__() const;
     /*! Equality comparator
      * \param o - Object to be compared with
      * \return whether the 2 objects are equal
@@ -33,11 +35,15 @@ public:
      * */
     virtual int compare(const Basic &o) const;
     //! \return name of the Symbol.
-    inline std::string get_name() const {
+    inline const std::string &get_name() const
+    {
         return name_;
     }
 
-    virtual vec_basic get_args() const { return {}; }
+    virtual vec_basic get_args() const
+    {
+        return {};
+    }
 };
 
 //! inline version to return `Symbol`

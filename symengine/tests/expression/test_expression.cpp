@@ -1,9 +1,7 @@
 #include "catch.hpp"
-#include <iostream>
 #include <chrono>
 
 #include <symengine/expression.h>
-#include <symengine/functions.h>
 
 using SymEngine::Expression;
 using SymEngine::symbol;
@@ -26,7 +24,8 @@ TEST_CASE("Constructors of Expression", "[Expression]")
     REQUIRE(eq(*e2.get_basic(), *real_double(10.0)));
 
     Expression e3 = std::complex<double>(1.0, 2.0);
-    REQUIRE(eq(*e3.get_basic(), *complex_double(std::complex<double>(1.0, 2.0))));
+    REQUIRE(
+        eq(*e3.get_basic(), *complex_double(std::complex<double>(1.0, 2.0))));
 }
 
 TEST_CASE("Printing of Expression", "[Expression]")
@@ -51,8 +50,8 @@ TEST_CASE("Arithmetic of Expression", "[Expression]")
     auto t1 = std::chrono::high_resolution_clock::now();
     auto res = expand(pow_ex(z, 45) * pow_ex(z, 45));
     auto t2 = std::chrono::high_resolution_clock::now();
-    std::cout
-        << std::chrono::duration_cast<std::chrono::nanoseconds>(t2-t1).count()
-        << "ns" << std::endl;
+    std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1)
+                     .count()
+              << "ns" << std::endl;
     std::cout << res << std::endl;
 }

@@ -1,19 +1,10 @@
 #include "catch.hpp"
 
-#include <symengine/basic.h>
-#include <symengine/add.h>
-#include <symengine/symbol.h>
-#include <symengine/dict.h>
-#include <symengine/integer.h>
-#include <symengine/rational.h>
-#include <symengine/complex.h>
-#include <symengine/mul.h>
-#include <symengine/pow.h>
-#include <symengine/functions.h>
-#include <symengine/visitor.h>
 #include <symengine/eval_double.h>
 #include <symengine/numer_denom.cpp>
+#include <symengine/symengine_exception.h>
 
+using SymEngine::SymEngineException;
 using SymEngine::Basic;
 using SymEngine::Add;
 using SymEngine::Mul;
@@ -35,8 +26,8 @@ using SymEngine::as_numer_denom;
 
 TEST_CASE("NumerDenom: Basic", "[as_numer_denom]")
 {
-    RCP<const Symbol> x  = symbol("x");
-    RCP<const Symbol> y  = symbol("y");
+    RCP<const Symbol> x = symbol("x");
+    RCP<const Symbol> y = symbol("y");
     RCP<const Basic> r1, num, den;
 
     r1 = add(x, y);
@@ -119,34 +110,35 @@ TEST_CASE("NumerDenom: Pow", "[as_numer_denom]")
 
 TEST_CASE("NumerDenom: Add", "[as_numer_denom]")
 {
-    RCP<const Symbol> x  = symbol("x");
-    RCP<const Symbol> y  = symbol("y");
-    RCP<const Symbol> z  = symbol("z");
+    RCP<const Symbol> x = symbol("x");
+    RCP<const Symbol> y = symbol("y");
+    RCP<const Symbol> z = symbol("z");
     RCP<const Basic> r1, num, den;
 
     // (1/x^2) + x^2
     r1 = add(pow(x, integer(2)), pow(x, integer(-2)));
     as_numer_denom(r1, outArg(num), outArg(den));
-    REQUIRE(eq(*num, *add(pow(x, integer(4)), one)));      // x^4 + 1
-    REQUIRE(eq(*den, *pow(x, integer(2))));                // x^2
+    REQUIRE(eq(*num, *add(pow(x, integer(4)), one))); // x^4 + 1
+    REQUIRE(eq(*den, *pow(x, integer(2))));           // x^2
 
     // (1/x^3) + (1/x^6)
     r1 = add(pow(x, integer(-3)), pow(x, integer(-6)));
     as_numer_denom(r1, outArg(num), outArg(den));
-    REQUIRE(eq(*num, *add(pow(x, integer(3)), one)));       // x^3 + 1
-    REQUIRE(eq(*den, *pow(x, integer(6))));                 // x^6
+    REQUIRE(eq(*num, *add(pow(x, integer(3)), one))); // x^3 + 1
+    REQUIRE(eq(*den, *pow(x, integer(6))));           // x^6
 
     // (x/4) + (y/6)
     r1 = add(div(x, integer(4)), div(y, integer(6)));
     as_numer_denom(r1, outArg(num), outArg(den));
-    REQUIRE(eq(*num, *add(mul(integer(3), x), mul(integer(2), y)))); // 3*x + 2*y
-    REQUIRE(eq(*den, *integer(12)));                                 // 12
+    REQUIRE(
+        eq(*num, *add(mul(integer(3), x), mul(integer(2), y)))); // 3*x + 2*y
+    REQUIRE(eq(*den, *integer(12)));                             // 12
 
     // (1/xy) + (1/yz)
     r1 = add(div(one, mul(x, y)), div(one, mul(y, z)));
     as_numer_denom(r1, outArg(num), outArg(den));
-    REQUIRE(eq(*num, *add(x, z)));                  // x + z
-    REQUIRE(eq(*den, *mul(x, mul(y, z))));          // x*y*z
+    REQUIRE(eq(*num, *add(x, z)));         // x + z
+    REQUIRE(eq(*den, *mul(x, mul(y, z)))); // x*y*z
 }
 
 TEST_CASE("Complex: Basic", "[basic]")
