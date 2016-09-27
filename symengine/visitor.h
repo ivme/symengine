@@ -165,7 +165,7 @@ public:
 
     /*!
      * Determines whether \c b's argument tree contains \c x_.
-     * \return {\c true if \c b's argument tree contains \c x_, otherwise \c false.}
+     * \return \c true if \c b's argument tree contains \c x_, otherwise \c false.
      */
     bool apply(const Basic &b)
     {
@@ -180,7 +180,7 @@ public:
  * Determines whether the symbol \c x is present in \c b's argument tree.
  * @param b an expression to be searched.
  * @param x the desired symbol.
- * \return {\c true if \c b's argument tree contains \c x, otherwise \c false.}
+ * \return \c true if \c b's argument tree contains \c x, otherwise \c false.
  */
 bool has_symbol(const Basic &b, const Symbol &x);
 
@@ -276,7 +276,7 @@ public:
     /*!
      * Visits b.
      * @param b an expression in which to find the coefficient of x_**n_.
-     * \return {The coefficient of \c x_**n_ in expression \c b.}
+     * \return the coefficient of \c x_**n_ in expression \c b.
      */
     RCP<const Basic> apply(const Basic &b)
     {
@@ -296,7 +296,7 @@ public:
 RCP<const Basic> coeff(const Basic &b, const Basic &x, const Basic &n);
 
 /*!
- * \return {the set of free symbols expression \c b.}
+ * \return the set of free symbols expression \c b.
  */
 set_basic free_symbols(const Basic &b);
 
