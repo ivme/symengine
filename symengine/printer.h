@@ -6,10 +6,19 @@
 namespace SymEngine
 {
 
+/*!
+ * Produces an ascii art representation of the word SymEngine.
+ */
 std::string ascii_art();
 
+/*!
+ * The four levels of operator precedence in SymEngine.
+ */
 enum class PrecedenceEnum { Add, Mul, Pow, Atom };
 
+/*
+ * \c Visitor that records the operator precedence of the object it visits.
+ */
 class Precedence : public BaseVisitor<Precedence>
 {
 public:
@@ -176,6 +185,9 @@ public:
     }
 };
 
+/*!
+ * \c Visitor that generates the string representation of the object it visits.
+ */
 class StrPrinter : public BaseVisitor<StrPrinter>
 {
 protected:
@@ -236,16 +248,41 @@ public:
 #endif
     void bvisit(const NumberWrapper &x);
 
+    //TODO:  make this private?
     virtual void _print_pow(std::ostringstream &o, const RCP<const Basic> &a,
                             const RCP<const Basic> &b);
 
+    /*!
+     * \return The string representation of x, 
+     * enclosed in parentheses if x's precedence is less than precedenceEnum.
+     */
     std::string parenthesizeLT(const RCP<const Basic> &x,
                                PrecedenceEnum precedenceEnum);
+
+    /*!
+     * \return the string representation of x, 
+     * enclosed in parentheses if x's precedence is less than
+     * or equal to precedenceEnum.
+     */
     std::string parenthesizeLE(const RCP<const Basic> &x,
                                PrecedenceEnum precedenceEnum);
 
+    /*!
+     * \param b The object to be printed.
+     * \return The string representation of \c b
+     */
     std::string apply(const RCP<const Basic> &b);
+
+    /*!
+     * \param v A vector of objects to be printed.
+     * \return A comma-separated list of the string representations of elements in \c v
+     */
     std::string apply(const vec_basic &v);
+
+    /*!
+     * \param b The object to be printed.
+     * \return The string representation of \c b
+     */
     std::string apply(const Basic &b);
 };
 }
