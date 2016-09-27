@@ -25,7 +25,7 @@
 namespace SymEngine
 {
 
-/*
+/*!
  * Abstract base class for all visitors (see https://en.wikipedia.org/wiki/Visitor_pattern).
  * Has pure virtual visit methods for all symengine types, 
  * but these visit methods do not appear in doxygen 
@@ -39,27 +39,28 @@ public:
 #undef SYMENGINE_ENUM
 };
 
-/* Traverses the argument tree of \c b.
+/*! Traverses the argument tree of \c b.
  * Calls \c b.accept(v), then recursively processes arguments of \c b.
  * @param[in] b The Basic instance to be processed.
  * @param[in] v The Visitor instance that will process nodes in \c b's tree.
  */
 void preorder_traversal(const Basic &b, Visitor &v);
 
-/* Traverses the argument tree of \c b.
+/*! Traverses the argument tree of \c b.
  * Recursively processes arguments of \c b, then calls \c b.accept(v).
  * @param[in] b The Basic instance to be processed.
  * @param[in] v The Visitor instance that will process nodes in \c b's tree.
  */
 void postorder_traversal(const Basic &b, Visitor &v);
 
-/*
+/*!
  * Templated base class for visitors.
  * Instantiations should specify a derived class of \c Visitor 
  * for the template parameter \c Base.  Instantiations of \c BaseVisitor 
  * thus inherit from Visitor.
  * BaseVisitor implements static polymorphism via the curiously recurring template pattern.
- * In particular, BaseVisitor implements the \c visit method for 
+ * In particular, BaseVisitor implements the \c visit method
+ * of \c Visitor by calling the bvisit method of Derived.
  * @tparam Derived A class that inherits from \c BaseVisitor.  Must implement \c bvisit(const Basic).
  * @tparam Base A class that inherits from \c Visitor (e.g. \c StopVisitor).
  */
@@ -92,7 +93,7 @@ public:
 #undef SYMENGINE_ENUM
 };
 
-/*
+/*!
  * Abstract base class for \c Visitors that may stop
  * recursively processing nodes before the tree has
  * been fully traversed.  Processing stops when \c stop_ is set to \c true.
@@ -103,14 +104,14 @@ public:
     bool stop_;
 };
 
-/* Traverses the argument tree of \c b.
+/*! Traverses the argument tree of \c b.
  * Calls \c b.accept(v), then recursively processes arguments of \c b.
  * Recursive processing stops if \c v.stop_ == true.
  * @param[in] b The Basic instance to be processed.
  * @param[in] v The Visitor instance that will process nodes in \c b's tree.
  */
 void preorder_traversal_stop(const Basic &b, StopVisitor &v);
-/* Traverses the argument tree of \c b.
+/*! Traverses the argument tree of \c b.
  * Calls \c b.accept(v), then recursively processes arguments of \c b.
  * Recursive processing stops if \c v.stop_ == true.
  * @param[in] b The Basic instance to be processed.
@@ -118,31 +119,31 @@ void preorder_traversal_stop(const Basic &b, StopVisitor &v);
  */
 void postorder_traversal_stop(const Basic &b, StopVisitor &v);
 
-/*
+/*!
  * Visitor for determining whether a given symbol
  * is present an expression.
  */
 class HasSymbolVisitor : public BaseVisitor<HasSymbolVisitor, StopVisitor>
 {
 protected:
-    /*
+    /*!
      * The symbol for which to search.
      */
     Ptr<const Symbol> x_;
-    /*
+    /*!
      * If true, then \c x_ is present in the expression.
      */
     bool has_;
 
 public:
-    /*
+    /*!
      * @param x The symbol for which to search.
      */
     HasSymbolVisitor(Ptr<const Symbol> x) : x_(x)
     {
     }
 
-    /*
+    /*!
      * Determines whether \c x is the symbol
      * we are looking for.  If so, recursive traversal stops.
      * @param x The symbol to be compared against the desired symbol, \c x_.
@@ -155,14 +156,14 @@ public:
         }
     }
 
-    /*
+    /*!
      * Visit function for all SymEngine types that are not Symbols.
      * Does nothing.
      * @param x A SymEngine object that is not a Symbol.
      */
     void bvisit(const Basic &x){};
 
-    /*
+    /*!
      * Determines whether \c b's argument tree contains \c x_.
      * \return {\c true if \c b's argument tree contains \c x_, otherwise \c false.}
      */
@@ -175,7 +176,7 @@ public:
     }
 };
 
-/*
+/*!
  * Determines whether the symbol \c x is present in \c b's argument tree.
  * @param b an expression to be searched.
  * @param x the desired symbol.
@@ -183,17 +184,21 @@ public:
  */
 bool has_symbol(const Basic &b, const Symbol &x);
 
-/*
- * 
+/*!
+ * A Visitor that computes the coefficient of a given power of a symbol.
  */
 class CoeffVisitor : public BaseVisitor<CoeffVisitor, StopVisitor>
 {
 protected:
+    //! the symbol
     Ptr<const Symbol> x_;
+    //! the exponent
     Ptr<const Basic> n_;
+    //! the coefficient
     RCP<const Basic> coeff_;
 
 public:
+    //! Constructor.
     CoeffVisitor(Ptr<const Symbol> x, Ptr<const Basic> n) : x_(x), n_(n)
     {
     }
@@ -211,7 +216,7 @@ public:
         coeff_ = Add::from_dict(coef, std::move(dict));
     }
 
-    /*
+    /*!
      * Sets coeff_ equal to the coefficient of \c x_**n_ in a product x.
      * Examples:
      * If *x_ == a, *n_ == 2 and x == 3*a**2, then bvisit(x) assigns \c coeff_ = 3.
@@ -233,7 +238,7 @@ public:
         coeff_ = zero;
     }
 
-    /*
+    /*!
      * Assigns \c coeff_ = 1 if the base of \c x is \c x_ and the exponent of \c x is \c n_.
      * Otherwise \c coeff_ = 0.
      */
@@ -246,7 +251,7 @@ public:
         }
     }
 
-    /*
+    /*!
      * Assigns \c coeff_ = 1 if x_ == x and n_ == 1.
      * Otherwise \c coeff_ = 0.
      */
@@ -259,7 +264,7 @@ public:
         }
     }
 
-    /*
+    /*!
      * Assigns \c coeff_ = 0
      * This overload is called for any argument that is not a \c Mul, \c Pow, or \c Symbol.
      */
@@ -268,7 +273,7 @@ public:
         coeff_ = zero;
     }
 
-    /*
+    /*!
      * Visits b.
      * @param b an expression in which to find the coefficient of x_**n_.
      * \return {The coefficient of \c x_**n_ in expression \c b.}
@@ -281,16 +286,16 @@ public:
     }
 };
 
-/*
+/*!
  * Determines the coefficient of \c x**n in expression \c b.
  * @param b an expression in which to find the coefficient of x**n.
  * @param x the base
  * @param n the exponent
- * \return {the coefficient of \c x**n in expression \c b}
+ * \return the coefficient of \c x**n in expression \c b
  */
 RCP<const Basic> coeff(const Basic &b, const Basic &x, const Basic &n);
 
-/*
+/*!
  * \return {the set of free symbols expression \c b.}
  */
 set_basic free_symbols(const Basic &b);
