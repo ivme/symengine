@@ -1,3 +1,7 @@
+/*!
+    \file codegen.h
+ */
+
 #ifndef SYMENGINE_CODEGEN_H
 #define SYMENGINE_CODEGEN_H
 
@@ -7,6 +11,10 @@
 
 namespace SymEngine
 {
+
+/*!
+ \c Visitor that generates a C code fragment that evaluates the visited object.
+ */
 
 class CodePrinter : public BaseVisitor<CodePrinter, StrPrinter>
 {
@@ -152,6 +160,10 @@ public:
     }
 };
 
+/*!
+    \param x A SymEngine object for which a C code fragment will be generated.
+    \return A fragment of C code evaluating \c x.
+ */
 std::string ccode(const Basic &x)
 {
     CodePrinter c;
