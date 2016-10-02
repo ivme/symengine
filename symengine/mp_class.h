@@ -3,7 +3,10 @@
 
 #include <symengine/mp_wrapper.h>
 
-#if SYMENGINE_INTEGER_CLASS == SYMENGINE_PIRANHA
+#if SYMENGINE_INTEGER_CLASS == SYMENGINE_BOOSTMP
+#include <boost/multiprecision/cpp_int.hpp>
+#include <boost/multiprecision/cpp_rational.hpp>
+#elif SYMENGINE_INTEGER_CLASS == SYMENGINE_PIRANHA
 #include <piranha/mp_integer.hpp>
 #include <piranha/mp_rational.hpp>
 #elif SYMENGINE_INTEGER_CLASS == SYMENGINE_GMPXX
@@ -37,7 +40,10 @@ namespace SymEngine
  * to be defined.
  */
 
-#if SYMENGINE_INTEGER_CLASS == SYMENGINE_PIRANHA
+#if SYMENGINE_INTEGER_CLASS == SYMENGINE_BOOSTMP
+typedef boost::multiprecision::cpp_int integer_class;
+typedef boost::multiprecision::cpp_rational rational_class;
+#elif SYMENGINE_INTEGER_CLASS == SYMENGINE_PIRANHA
 typedef piranha::integer integer_class;
 typedef piranha::rational rational_class;
 #elif SYMENGINE_INTEGER_CLASS == SYMENGINE_FLINT
