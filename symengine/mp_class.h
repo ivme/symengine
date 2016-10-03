@@ -4,10 +4,7 @@
 #include <symengine/mp_wrapper.h>
 
 #if SYMENGINE_INTEGER_CLASS == SYMENGINE_BOOSTMP
-/*
 #include <boost/multiprecision/cpp_int.hpp>
-#include <boost/multiprecision/cpp_rational.hpp>
-*/
 #elif SYMENGINE_INTEGER_CLASS == SYMENGINE_PIRANHA
 #include <piranha/mp_integer.hpp>
 #include <piranha/mp_rational.hpp>
