@@ -890,7 +890,6 @@ int mp_kronecker(const integer_class &a, const integer_class &n);
 
 #endif //SYMENGINE_INTEGER_CLASS == SYMENGINE_BOOSTMP
 
-
 //The implementation of each of the following
 //requires only get_mpz_t(integer_class), mp_demote
 //and functions from GMP.  They don't depend on
