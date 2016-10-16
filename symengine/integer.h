@@ -25,6 +25,7 @@ public:
     //! Constructor of Integer using `integer_class`
     //explicit Integer(integer_class i);
     Integer(const integer_class &_i) : i(_i) {}
+    Integer(integer_class &&_i) : i(std::move(_i)) {}
     //! \return size of the hash
     virtual hash_t __hash__() const;
     /*! Equality comparator
