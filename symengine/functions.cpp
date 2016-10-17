@@ -2749,7 +2749,11 @@ RCP<const Basic> polygamma(const RCP<const Basic> &n_,
             } else {
                 return make_rcp<const PolyGamma>(n_, x_);
             }
+            #if SYMENGINE_INTEGER_CLASS != SYMENGINE_BOOSTMP
             rational_class a(0), f(r, den);
+            #else
+            rational_class a(0), f(integer_class(r),den); //r is an expression template in boost
+            #endif
             for (unsigned long i = 0; i < (num - r) / den; ++i) {
                 a += 1 / (f + i);
             }
