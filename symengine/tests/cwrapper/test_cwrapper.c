@@ -84,11 +84,13 @@ void test_cwrapper()
     SYMENGINE_C_ASSERT(basic_number_sign(e) == -1);
     SYMENGINE_C_ASSERT(is_a_Number(e) == 1);
     
+    #if SYMENGINE_INTEGER_CLASS != SYMENGINE_BOOSTMP
     mpz_t test;
     mpz_init(test);
 
     integer_get_mpz(test, e);
     SYMENGINE_C_ASSERT(mpz_get_ui(test) == 123);
+    #endif
     
     char *str = "123 + 321";
     basic p;
@@ -97,7 +99,9 @@ void test_cwrapper()
     SYMENGINE_C_ASSERT(is_a_Integer(p));
     SYMENGINE_C_ASSERT(integer_get_si(p) == 444);
 
+    #if SYMENGINE_INTEGER_CLASS != SYMENGINE_BOOSTMP
     mpz_clear(test);
+    #endif
     basic_free_stack(f);
     basic_free_stack(e);
     basic_free_stack(x);
