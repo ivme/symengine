@@ -43,7 +43,7 @@ void mp_fdiv_qr(integer_class &q, integer_class &r,
   boost::multiprecision::divide_qr(a_cpy,b_cpy,q,r);
   if (needs_flooring) {
     q -= 1;
-    r += b_cpy;
+    if (r<0) {r += b_cpy;}
   }
 }
 
