@@ -3,6 +3,10 @@
 #include <symengine/complex.h>
 #include <symengine/symengine_exception.h>
 
+#include <iostream>
+using std::cout;
+using std::endl;
+
 namespace SymEngine
 {
 
@@ -343,6 +347,7 @@ void Mul::as_base_exp(const RCP<const Basic> &self,
 
 RCP<const Basic> mul(const RCP<const Basic> &a, const RCP<const Basic> &b)
 {
+    //cout << "entering mul(" << a->__str__() << "," << b->__str__() << ")" << endl;
     SymEngine::map_basic_basic d;
     RCP<const Number> coef = one;
     if (is_a<Mul>(*a) and is_a<Mul>(*b)) {

@@ -41,7 +41,6 @@ void print(std::ostream &os, const std::vector<RCP<const Basic>> &vars) {
 
 int main() {
     RCP<const Symbol> x = symbol("x");
-    /*
     RCP<const Symbol> y = symbol("y");
     RCP<const Symbol> z = symbol("z");
 
@@ -50,17 +49,15 @@ int main() {
     RCP<const Basic> i3 = integer(3);
     RCP<const Basic> i6 = integer(6);
     RCP<const Basic> i12 = integer(12);
-    */
-    //RCP<const Basic> r1;
-    /*
+    RCP<const Basic> r1;
     RCP<const Basic> r2;
     RCP<const Basic> r3;
 
     r1 = mul(i3,pi);
-    r2 = sub(r1, y);
+    r2 = sub(r1, x);
     print(std::cout,{r1,r2});
-    */
-    sin(sub(mul(integer(3),pi),x));
+    r3 = sin(r2);
+    //sin(sub(mul(integer(3),pi),x));
 
     // sin(3*pi - y) = sin(y)
     // r1 = sin(sub(mul(i3, pi), y));
