@@ -138,14 +138,14 @@ TEST_CASE("Sin: functions", "[functions]")
 
     r1 = sin(x);
     r2 = sin(x);
-    std::cout << *r1 << std::endl;
+    std::cout << *r1 << std::endl; //sin(x)
 
     REQUIRE(eq(*r1, *r2));
     REQUIRE(neq(*r1, *zero));
 
     r1 = sin(zero);
     r2 = zero;
-    std::cout << *r1 << std::endl;
+    std::cout << *r1 << std::endl; //0
     REQUIRE(eq(*r1, *r2));
 
     r1 = sin(x)->diff(x);
@@ -154,32 +154,32 @@ TEST_CASE("Sin: functions", "[functions]")
 
     r1 = mul(i2, x)->diff(x);
     r2 = i2;
-    std::cout << *r1 << std::endl;
-    std::cout << *r2 << std::endl;
+    std::cout << *r1 << std::endl; //2
+    std::cout << *r2 << std::endl; //2
     REQUIRE(eq(*r1, *r2));
 
-    r1 = sin(mul(i2, x))->diff(x);
+    r1 = sin(mul(i2, x))->diff(x); 
     r2 = mul(i2, cos(mul(i2, x)));
-    std::cout << *r1 << std::endl;
-    std::cout << *r2 << std::endl;
-    REQUIRE(eq(*r1, *r2));
+    std::cout << *r1 << std::endl; //2*cos(2*x)
+    std::cout << *r2 << std::endl; //2*cos(2*x)
+    REQUIRE(eq(*r1, *r2)); 
 
     r1 = mul(x, sin(x))->diff(x);
     r2 = add(sin(x), mul(x, cos(x)));
-    std::cout << *r1 << std::endl;
-    std::cout << *r2 << std::endl;
+    std::cout << *r1 << std::endl; //x*cos(x) + sin(x)
+    std::cout << *r2 << std::endl; //x*cos(x) + sin(x)
     REQUIRE(eq(*r1, *r2));
 
     r1 = mul(x, sin(x))->diff(x)->diff(x);
     r2 = add(mul(i2, cos(x)), neg(mul(x, sin(x))));
-    std::cout << *r1 << std::endl;
-    std::cout << *r2 << std::endl;
+    std::cout << *r1 << std::endl; //-x*sin(x) + 2*cos(x)
+    std::cout << *r2 << std::endl; //-x*sin(x) + 2*cos(x)
     REQUIRE(eq(*r1, *r2));
 
     r1 = mul(sin(x), cos(x))->diff(x);
     r2 = sub(pow(cos(x), i2), pow(sin(x), i2));
-    std::cout << *r1 << std::endl;
-    std::cout << *r2 << std::endl;
+    std::cout << *r1 << std::endl; //-sin(x)**2 + cos(x)**2
+    std::cout << *r2 << std::endl; //-sin(x)**2 + cos(x)**2
     REQUIRE(eq(*r1, *r2));
 
     // sin(-y) = -sin(y)
