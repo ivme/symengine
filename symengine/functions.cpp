@@ -1,5 +1,8 @@
 #include <symengine/visitor.h>
 #include <symengine/symengine_exception.h>
+#include <iostream>
+using std::cout;
+using std::endl;
 
 namespace SymEngine
 {
@@ -45,11 +48,13 @@ extern umap_basic_basic inverse_tct;
 bool get_pi_shift(const RCP<const Basic> &arg, const Ptr<RCP<const Number>> &n,
                   const Ptr<RCP<const Basic>> &x)
 {
+    //cout << "entering get_pi_shift(" << arg->__str__() << ")" << endl;
     if (is_a<Add>(*arg)) {
         const Add &s = static_cast<const Add &>(*arg);
         RCP<const Basic> coef = s.coef_;
         int size = s.dict_.size();
         if (size > 1) {
+            cout << "size > 1" << endl;
             // arg should be of form `x + n*pi`
             // `n` is an integer
             // `x` is an `Expression`
@@ -65,6 +70,7 @@ bool get_pi_shift(const RCP<const Basic> &arg, const Ptr<RCP<const Number>> &n,
                     *x = add(mul(p.first, p.second), *x);
                 }
             }
+            cout << "completed for (const auro &p : s.dict_) " << endl;
             if (check_pi)
                 return true;
             else // No term with `pi` found
@@ -83,6 +89,7 @@ bool get_pi_shift(const RCP<const Basic> &arg, const Ptr<RCP<const Number>> &n,
             }
         } else { // Should never reach here though!
             // Dict of size < 1
+            cout << "shouldn't have gotten here" << endl;
             return false;
         }
     } else if (is_a<Mul>(*arg)) {
@@ -225,11 +232,15 @@ bool trig_simplify(const RCP<const Basic> &arg, unsigned period, bool odd,
                    const Ptr<RCP<const Basic>> &rarg, int &index,
                    int &sign) // output
 {
+    //cout << "entering trig_simplify(" << arg->__str__() << "," << period << 
+    //    "," << odd << "," << conj_odd << ")" << endl;
     bool check;
     RCP<const Number> n;
     RCP<const Basic> r;
     RCP<const Basic> ret_arg;
     check = get_pi_shift(arg, outArg(n), outArg(r));
+    //cout << "check == " << check << "; n == " <<
+    //    n->__str__() << "; r == " << r->__str__() << ";" << endl;
     if (check) {
         RCP<const Number> t = mulnum(n, integer(12));
         sign = 1;
@@ -264,7 +275,9 @@ bool trig_simplify(const RCP<const Basic> &arg, unsigned period, bool odd,
             get_num(m) = t;
             #else
             integer_class quo;
-            mp_fdiv_qr(t,quo,get_num(m),get_den(m));
+            mp_fdiv_qr(quo,t,get_num(m),get_den(m));
+            //cout << "quo = " << quo << "; t = " << t << "; num(m) = " << 
+            //    get_num(m) << "; den(m) = " << get_den(m) << ";" << endl;
             m -= rational_class(quo);
             #endif
             // m = a / b => m = (a % b / b)
@@ -348,6 +361,7 @@ bool Sin::is_canonical(const RCP<const Basic> &arg) const
 
 RCP<const Basic> sin(const RCP<const Basic> &arg)
 {
+    //cout << "entering sin(" << arg->__str__() << ")" << endl;
     if (eq(*arg, *zero))
         return zero;
     if (is_a_Number(*arg)
