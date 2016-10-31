@@ -5,6 +5,10 @@
 #include <symengine/rational.h>
 #include <symengine/add.h>
 #include <symengine/mul.h>
+#include <iostream>
+
+using std::cout;
+using std::endl;
 
 using SymEngine::Basic;
 using SymEngine::Integer;
@@ -594,6 +598,7 @@ TEST_CASE("test_nthroot_mod(): ntheory", "[ntheory]")
     REQUIRE(nthroot_mod(outArg(nthroot), i2, i3, i105) == false);
 
     REQUIRE(nthroot_mod(outArg(nthroot), i5, i1, i100) == true);
+    cout << "nthroot = " << *nthroot << "; i5 = " << i5 << endl;
     REQUIRE(eq(*nthroot, *i5));
 
     REQUIRE(nthroot_mod(outArg(nthroot), im1, i2, i41) == true);

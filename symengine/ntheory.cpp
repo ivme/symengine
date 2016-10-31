@@ -16,6 +16,10 @@
 #include "rational.h"
 #endif // HAVE_SYMENGINE_ARB
 
+#include <iostream>
+using std::cout;
+using std::endl;
+
 namespace SymEngine
 {
 
@@ -700,6 +704,7 @@ void _crt_cartesian(std::vector<RCP<const Integer>> &R,
                     const std::vector<std::vector<RCP<const Integer>>> &rem,
                     const std::vector<RCP<const Integer>> &mod)
 {
+    cout << "body of _crt_cartesian" << endl;
     if (mod.size() > rem.size())
         throw SymEngineException("Too few remainders");
     if (mod.size() == 0)
@@ -1005,6 +1010,7 @@ namespace
 bool _sqrt_mod_tonelli_shanks(integer_class &rop, const integer_class &a,
                               const integer_class &p)
 {
+    cout << "body of _sqrt_mod_tonelli_shanks..." << endl;
     #if SYMENGINE_INTEGER_CLASS != SYMENGINE_BOOSTMP
     gmp_randstate_t state;
     gmp_randinit_default(state);
@@ -1156,6 +1162,8 @@ bool _nthroot_mod1(std::vector<RCP<const Integer>> &roots,
                    const integer_class &p, const unsigned k,
                    bool all_roots = false)
 {
+    cout << "body of _nthroot_mod1(" << a << "," << n << "," 
+        << p << "," << k << "," << all_roots << ")" << endl;
     integer_class _n, r, root, s, t, g(0), pk, m, phi;
     mp_pow_ui(pk, p, k);
     phi = pk * (p - 1) / p;
@@ -1164,6 +1172,7 @@ bool _nthroot_mod1(std::vector<RCP<const Integer>> &roots,
     mp_powm(t, a, t, pk);
     // Check whether a**(phi / gcd(phi, n)) == 1 mod p**k.
     if (t != 1) {
+        cout << "returning false from _nthroot_mod1 because t != 1" << endl;
         return false;
     }
     // Solve x**n == a mod p first.
@@ -1299,6 +1308,7 @@ bool _nthroot_mod_prime_power(std::vector<RCP<const Integer>> &roots,
                               const integer_class &p, const unsigned k,
                               bool all_roots = false)
 {
+    cout << "body of _nthroot_mod_prime_power" << endl;
     integer_class pk, root;
     std::vector<RCP<const Integer>> _roots;
     if (a % p != 0) {
@@ -1530,9 +1540,12 @@ void nthroot_mod_list(std::vector<RCP<const Integer>> &roots,
                       const RCP<const Integer> &a, const RCP<const Integer> &n,
                       const RCP<const Integer> &m)
 {
+    cout << "body of nthroot_mod_list" << endl;
     if (m->as_integer_class() <= 0) {
+        cout <<"terminating nthroot_mod_list early -- m <= 0" << endl;
         return;
     } else if (m->as_integer_class() == 1) {
+        cout <<"terminating nthroot_mod_list early -- m == 1" << endl;
         roots.push_back(integer(0));
         return;
     }
@@ -1550,12 +1563,18 @@ void nthroot_mod_list(std::vector<RCP<const Integer>> &roots,
         ret_val = _nthroot_mod_prime_power(
             rem1, a->as_integer_class(), n->as_integer_class(),
             it.first->as_integer_class(), it.second, true);
-        if (not ret_val)
+        if (not ret_val) {
+            cout << "exiting nthroot_mod_list early: _nthroot_mod_prime_power returned false" << endl;
+            cout << "details: ret_val = _nthroot_mod_prime_power(rem1,"
+            << a->as_integer_class() << "," << n->as_integer_class() << "," <<
+            it.first->as_integer_class() << "," << it.second << ", true);" << endl;
             return;
+        }
         rem.push_back(rem1);
     }
     _crt_cartesian(roots, rem, moduli);
     std::sort(roots.begin(), roots.end(), SymEngine::RCPIntegerKeyLess());
+    cout << "exiting nthroot_mod_list..." << endl;
 }
 
 bool powermod(const Ptr<RCP<const Integer>> &powm, const RCP<const Integer> &a,

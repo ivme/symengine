@@ -4,6 +4,10 @@
 #include <symengine/mul.h>
 #include <symengine/pow.h>
 #include <symengine/symengine_exception.h>
+#include <iostream>
+
+using std::cout;
+using std::endl;
 
 namespace SymEngine
 {
@@ -853,9 +857,13 @@ std::set<GaloisFieldDict, GaloisFieldDict::DictLess>
 GaloisFieldDict::gf_zassenhaus() const
 {
     std::set<GaloisFieldDict, DictLess> factors;
+    cout << "before gf_ddf_zassenhaus()" << endl;
     auto temp1 = gf_ddf_zassenhaus();
+    cout << "after gf_ddf_zassenhaus()" << endl;
     for (auto &f : temp1) {
+        cout << "before gf_edf_zassenhaus()" << endl;
         auto temp2 = f.first.gf_edf_zassenhaus(f.second);
+        cout << "after gf_edf_zassenhaus()" << endl;
         factors.insert(temp2.begin(), temp2.end());
     }
     return factors;
@@ -886,7 +894,9 @@ GaloisFieldDict::gf_factor() const
     std::vector<std::pair<GaloisFieldDict, unsigned>> sqf_list
         = monic.gf_sqf_list();
     for (auto a : sqf_list) {
+        cout << "before gf_zassenhaus" << endl;
         auto temp = (a.first).gf_zassenhaus();
+        cout << "after gf_zassenhaus" << endl;
         for (auto f : temp)
             factors.insert({f, a.second});
     }

@@ -7,6 +7,10 @@
 #include <symengine/dict.h>
 #include <symengine/symbol.h>
 #include <symengine/symengine_exception.h>
+#include <iostream>
+
+using std::cout;
+using std::endl;
 
 using SymEngine::SymEngineException;
 using SymEngine::RCP;
@@ -174,7 +178,7 @@ TEST_CASE("GaloisFieldDict Division, GCD, LCM, Shifts : Basic", "[basic]")
 {
     RCP<const Symbol> x = symbol("x");
     std::vector<integer_class> a, b, mp;
-    GaloisFieldDict d1, d2, d3, d4;
+    GaloisFieldDict d1, d2, d3, d4, d5;
     a = {0_z, 1_z, 2_z, 3_z, 4_z, 5_z};
     b = {0_z, 3_z, 2_z, 1_z};
     d1 = GaloisFieldDict::from_vec(a, 7_z);
@@ -188,6 +192,11 @@ TEST_CASE("GaloisFieldDict Division, GCD, LCM, Shifts : Basic", "[basic]")
     REQUIRE(mp[0] == 0);
     REQUIRE(mp[1] == 1);
     REQUIRE(mp[2] == 6);
+    d5 = d1 /d2;
+    mp = d5.get_dict();
+    REQUIRE(mp[0] == 0);
+    REQUIRE(mp[1] == 1);
+    REQUIRE(mp[2] == 5);
     REQUIRE(d3 == d1 / d2);
     REQUIRE(d4 == d1 % d2);
 
@@ -721,6 +730,7 @@ TEST_CASE("GaloisFieldDict equal degree factorization : Basic", "[basic]")
 
 TEST_CASE("GaloisFieldDict factorization : Basic", "[basic]")
 {
+    cout << "entering TEST_CASE GaloisFieldDict factorization : Basic..." << endl; 
     GaloisFieldDict d1;
 
     d1 = GaloisFieldDict::from_vec({}, 11_z);
@@ -728,6 +738,7 @@ TEST_CASE("GaloisFieldDict factorization : Basic", "[basic]")
     REQUIRE(f.second.size() == 0);
     REQUIRE(f.first == 0_z);
 
+    cout << "line 741" << endl; 
     d1 = GaloisFieldDict::from_vec({1_z}, 11_z);
     f = d1.gf_factor();
     REQUIRE(f.second.size() == 0);
@@ -798,11 +809,16 @@ TEST_CASE("GaloisFieldDict factorization : Basic", "[basic]")
                 {GaloisFieldDict({{0, 10_z}, {8, 8_z}, {16, 1_z}}, 11_z), 1})
             != f.second.end());
 
+    cout << "line 811" << endl; 
     d1 = GaloisFieldDict({{32, 8_z}, {0, 5_z}}, 11_z);
+    cout << "before gf_factor" << endl;
     f = d1.gf_factor();
+    cout << "after gf_factor" << endl;
     REQUIRE(f.second.size() == 9);
     REQUIRE(f.first == 8_z);
+    cout << "before first find" << endl;
     it = f.second.find({GaloisFieldDict::from_vec({3_z, 1_z}, 11_z), 2});
+    cout << "after first find" << endl;
     REQUIRE(it == f.second.begin());
     REQUIRE(f.second.find({GaloisFieldDict::from_vec({8_z, 1_z}, 11_z), 1})
             == ++it);
@@ -829,6 +845,7 @@ TEST_CASE("GaloisFieldDict factorization : Basic", "[basic]")
                  1})
             == ++it);
 
+    cout << "line 844" << endl; 
     d1 = GaloisFieldDict({{63, 8_z}, {0, 5_z}}, 11_z);
     f = d1.gf_factor();
     REQUIRE(f.second.size() == 13);
@@ -903,6 +920,7 @@ TEST_CASE("GaloisFieldDict factorization : Basic", "[basic]")
                            1})
             == ++it);
 
+    cout << "line 919" << endl; 
     d1 = GaloisFieldDict::from_vec({38_z, 39_z, 41_z, 26_z, 5_z, 2_z, 1_z},
                                    53_z);
     f = d1.gf_factor();

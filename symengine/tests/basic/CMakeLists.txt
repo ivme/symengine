@@ -77,5 +77,4 @@ target_link_libraries(test_infinity symengine catch)
 add_test(test_infinity ${PROJECT_BINARY_DIR}/test_infinity)
 
 add_executable(test_integer_class test_integer_class.cpp)
-target_link_libraries(test_integer_class symengine catch)
-add_test(test_integer_class ${PROJECT_BINARY_DIR}/test_integer_class)
+target_link_libraries(test_integer_class symengine)
