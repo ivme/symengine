@@ -1169,6 +1169,7 @@ bool _nthroot_mod1(std::vector<RCP<const Integer>> &roots,
     phi = pk * (p - 1) / p;
     mp_gcd(m, phi, n);
     t = phi / m;
+    cout << "calling mp_powm(" << t << "," << a << "," << t << "," << pk << ")" << endl;
     mp_powm(t, a, t, pk);
     // Check whether a**(phi / gcd(phi, n)) == 1 mod p**k.
     if (t != 1) {
