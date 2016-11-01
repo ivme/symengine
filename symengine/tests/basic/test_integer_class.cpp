@@ -27,8 +27,8 @@ namespace SymEngine {
 
 using namespace SymEngine::literals;
 
-int main() {}  
+int main() {
     RCP<const Integer> i3 = integer(3);
     mul(i3, pi);
-   
+}
 }
