@@ -750,6 +750,7 @@ TEST_CASE("test_is_quad_residue(): ntheory", "[ntheory]")
 
 TEST_CASE("test_is_nth_residue(): ntheory", "[ntheory]")
 {
+    std::cout << "test_is_nth_residue(): ntheory" << std::endl;
     const RCP<const Integer> im1 = integer(-1);
     const RCP<const Integer> i1 = integer(1);
     const RCP<const Integer> i2 = integer(2);
@@ -786,6 +787,7 @@ TEST_CASE("test_is_nth_residue(): ntheory", "[ntheory]")
 
 TEST_CASE("test_mobius(): ntheory", "[ntheory]")
 {
+    cout << "test_mobius(): ntheory" << endl;
     RCP<const Integer> i1 = integer(1);
     RCP<const Integer> i2 = integer(2);
     RCP<const Integer> i3 = integer(3);
@@ -811,6 +813,7 @@ TEST_CASE("test_mobius(): ntheory", "[ntheory]")
 
 TEST_CASE("test_mertens(): ntheory", "[ntheory]")
 {
+    cout << "test_mertens(): ntheory" << endl;
     REQUIRE(mertens(1) == 1);
     REQUIRE(mertens(2) == 0);
     REQUIRE(mertens(4) == -1);
@@ -825,6 +828,7 @@ TEST_CASE("test_mertens(): ntheory", "[ntheory]")
 
 TEST_CASE("test_harmonic(): ntheory", "[ntheory]")
 {
+    cout << "test_harmonic(): ntheory" << endl;
     RCP<const Number> r1, r2;
     r1 = harmonic(4, 1);
     r2 = rational(25, 12);
