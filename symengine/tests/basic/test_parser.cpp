@@ -337,7 +337,7 @@ TEST_CASE("Parsing: polys", "[parser]")
     RCP<const Basic> x = symbol("x");
 
     s = "x + 2*x**2 + 1";
-    poly1 = from_basic<UIntPoly>(parse(s));
+    poly1 = from_basic<UIntPoly>(parse(s));//error in Release mode w/boostmp
     poly2 = UIntPoly::from_vec(x, {{1_z, 1_z, 2_z}});
     REQUIRE(eq(*poly1, *poly2));
 

@@ -686,7 +686,7 @@ TEST_CASE("GaloisFieldDict equal degree factorization : Basic", "[basic]")
     GaloisFieldDict d1, d2, d3, d4;
 
     d1 = GaloisFieldDict::from_vec({2_z, 1_z, 0_z, 1_z, 1_z}, 3_z);
-    auto f = d1.gf_edf_zassenhaus(2);
+    auto f = d1.gf_edf_zassenhaus(2); //error in Release mode with boostmp; no error with gmp
     REQUIRE(f.size() == 2);
     auto it = f.find(GaloisFieldDict::from_vec({1_z, 0_z, 1_z}, 3_z));
     REQUIRE(it == f.begin());

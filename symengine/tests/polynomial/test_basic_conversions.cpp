@@ -180,7 +180,7 @@ TEST_CASE("basic_to_poly UInt", "[b2poly]")
     // x**2 + x**(1/2)
     basic = add(pow(x, i2), pow(x, hf));
     gen = pow(x, hf);
-    poly1 = from_basic<UIntPoly>(basic, gen);
+    poly1 = from_basic<UIntPoly>(basic, gen); //error in Release mode with boostmp
     poly2 = UIntPoly::from_vec(gen, {{0_z, 1_z, 0_z, 0_z, 1_z}});
     REQUIRE(eq(*poly1, *poly2));
 

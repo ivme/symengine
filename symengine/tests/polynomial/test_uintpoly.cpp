@@ -83,8 +83,8 @@ TEST_CASE("Negative of a UIntPoly", "[UIntPoly]")
         = UIntPoly::from_dict(x, {{0, 1_z}, {1, 2_z}, {2, 1_z}});
     RCP<const UIntPoly> b = UIntPoly::from_dict(x, map_uint_mpz{});
 
-    RCP<const UIntPoly> c = neg_upoly(*a);
-    RCP<const UIntPoly> d = neg_upoly(*b);
+    RCP<const UIntPoly> c = neg_upoly(*a); //error in Release mode with boostmp
+    RCP<const UIntPoly> d = neg_upoly(*b); //no error in Release mode with boostmp
     REQUIRE(c->__str__() == "-x**2 - 2*x - 1");
     REQUIRE(d->__str__() == "0");
 }

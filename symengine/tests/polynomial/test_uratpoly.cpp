@@ -83,7 +83,7 @@ TEST_CASE("Negative of a URatPoly", "[URatPoly]")
     RCP<const URatPoly> a
         = URatPoly::from_dict(x, {{0, rc(ic(-1), 2_z)}, {1, 2_q}, {2, 3_q}});
 
-    RCP<const URatPoly> b = neg_upoly(*a);
+    RCP<const URatPoly> b = neg_upoly(*a); //error in Release mode with boostmp
     REQUIRE(b->__str__() == "-3*x**2 - 2*x + 1/2");
 }
 
