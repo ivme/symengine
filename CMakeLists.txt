@@ -648,8 +648,6 @@ endif()
 
 message("WITH_OPENMP: ${WITH_OPENMP}")
 
-message("ALL LIBRARIES: ${LIBS}")
-
 message("")
 message("--------------------------------------------------------------------------------")
 message("")
