@@ -276,8 +276,6 @@ bool trig_simplify(const RCP<const Basic> &arg, unsigned period, bool odd,
             #else
             integer_class quo;
             mp_fdiv_qr(quo,t,get_num(m),get_den(m));
-            //cout << "quo = " << quo << "; t = " << t << "; num(m) = " << 
-            //    get_num(m) << "; den(m) = " << get_den(m) << ";" << endl;
             m -= rational_class(quo);
             #endif
             // m = a / b => m = (a % b / b)
@@ -2316,6 +2314,32 @@ RCP<const Basic> erf(const RCP<const Basic> &arg)
         return neg(erf(neg(arg)));
     }
     return make_rcp<Erf>(arg);
+}
+
+bool Erfc::is_canonical(const RCP<const Basic> &arg) const
+{
+    if (is_a<Integer>(*arg) and rcp_static_cast<const Integer>(arg)->is_zero())
+        return false;
+    if (could_extract_minus(*arg))
+        return false;
+    return true;
+}
+
+RCP<const Basic> Erfc::create(const RCP<const Basic> &arg) const
+{
+    return erfc(arg);
+}
+
+RCP<const Basic> erfc(const RCP<const Basic> &arg)
+{
+    if (is_a<Integer>(*arg)
+        and rcp_static_cast<const Integer>(arg)->is_zero()) {
+        return one;
+    }
+    if (could_extract_minus(*arg)) {
+        return add(integer(2), neg((erfc(arg))));
+    }
+    return make_rcp<Erfc>(arg);
 }
 
 Gamma::Gamma(const RCP<const Basic> &arg) : OneArgFunction{arg}

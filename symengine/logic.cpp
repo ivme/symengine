@@ -354,8 +354,19 @@ RCP<const Boolean> logical_and(const set_boolean &s)
     return and_or<And>(s, false);
 }
 
+RCP<const Boolean> logical_nand(const set_boolean &s)
+{
+    RCP<const Boolean> a = logical_and(s);
+    return logical_not(a);
+}
+
 RCP<const Boolean> logical_or(const set_boolean &s)
 {
     return and_or<Or>(s, true);
+}
+
+RCP<const Boolean> logical_nor(const set_boolean &s)
+{
+    return logical_not(and_or<Or>(s, true));
 }
 }

@@ -63,7 +63,7 @@ void mp_gcdext(integer_class &gcd, integer_class &s, integer_class &t,
   	//beware of overwriting this_r during internal operations of divide_qr
   	//copy it first
   	integer_class this_r_cpy = this_r;
-    boost::multiprecision::divide_qr(this_r, next_r, q, this_r);
+    boost::multiprecision::divide_qr(this_r_cpy, next_r, q, this_r);
     this_s -= q*next_s;
     this_t -= q*next_t;
     std::swap(this_s, next_s);
@@ -123,7 +123,7 @@ void mp_powm(integer_class &res, const integer_class &base,
 	// where base**(-1) mod m is the modular inverse
 	if (exp < 0) {
 		integer_class base_inverse;
-		if (!mp_invert(base_inverse,base,m)) {throw SymEngine::UndefinedError("negative exponent undefined in powm if base is not invertible mod m");}
+		if (!mp_invert(base_inverse,base,m)) {throw SymEngine::SymEngineException("negative exponent undefined in powm if base is not invertible mod m");}
 		res = boost::multiprecision::powm(base_inverse,mp_abs(exp),m);
 		return;
 	} else {

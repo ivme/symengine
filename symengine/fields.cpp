@@ -695,7 +695,9 @@ GaloisFieldDict GaloisFieldDict::gf_random(const unsigned int &n_val,
     return GaloisFieldDict::from_vec(v, modulo_);
 }
 #else
-GaloisFieldDict GaloisFieldDict::gf_random(const unsigned int &n_val, boost::random::mt19937 &twister) const
+
+GaloisFieldDict GaloisFieldDict::gf_random(const unsigned int &n_val,
+                                           boost::random::mt19937 &twister) const
 {
     std::vector<integer_class> v(n_val + 1);
     boost::random::uniform_int_distribution<integer_class> ui(0,modulo_);
@@ -733,7 +735,10 @@ GaloisFieldDict::gf_edf_zassenhaus(const unsigned &n) const
         auto r = gf_random(2 * n - 1, state);
         #else
         auto r = gf_random(2 * n - 1, mt);
+<<<<<<< HEAD
         cout << "r = " << r.__str__() << endl;
+=======
+>>>>>>> boostmp
         #endif
         GaloisFieldDict g;
         if (modulo_ == 2_z) {
