@@ -81,3 +81,8 @@ if ("${INTEGER_CLASS}" MATCHES "boostmp")
 	target_link_libraries(test_integer_class symengine catch)
 	add_test(test_integer_class ${PROJECT_BINARY_DIR}/test_integer_class)
 endif()
+
+add_executable(test_debug test_debug.cpp)
+target_link_libraries(test_debug symengine catch)
+add_test(test_debug ${PROJECT_BINARY_DIR}/test_debug)
+
