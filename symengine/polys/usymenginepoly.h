@@ -2,6 +2,10 @@
 #define SYMENGINE_USYMENGINEPOLY_H
 
 #include <symengine/polys/upolybase.h>
+//DEBUG
+#include <iostream>
+using std::cout;
+using std::endl;
 
 namespace SymEngine
 {
@@ -52,6 +56,8 @@ public:
     static Container container_from_dict(const RCP<const Basic> &var,
                                          std::map<Key, Cf> &&d)
     {
+        //DEBUG
+        cout << "body of container_from_dict(const RCP<const Basic> &var,std::map<Key, Cf> &&d)" << endl;
         return std::move(Container(d));
     }
 

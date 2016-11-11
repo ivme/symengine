@@ -46,6 +46,8 @@ public:
 
     void bvisit(const Pow &x)
     {
+        //DEBUG
+        cout << "body of void PolyGeneratorVisitor::bvisit(const Pow &x)" << endl;
         if (is_a<const Integer>(*x.get_exp())) {
             if (rcp_static_cast<const Integer>(x.get_exp())->is_positive()) {
                 x.get_base()->accept(*this);
@@ -72,23 +74,31 @@ public:
 
     void bvisit(const Add &x)
     {
+        //DEBUG
+        cout << "body of void PolyGeneratorVisitor:bvisit(const Add &x)" << endl;
         for (auto it : x.dict_)
             it.first->accept(*this);
     }
 
     void bvisit(const Mul &x)
     {
+        //DEBUG
+        cout << "body of void PolyGeneratorVisitor::bvisit(const Mul &x)" << endl;
         for (auto it : x.dict_)
             it.first->accept(*this);
     }
 
     void bvisit(const Number &x)
     {
+        //DEBUG
+        cout << "body of void PolyGeneratorVisitor::bvisit(const Number &x)" << endl;
         // intentionally blank
     }
 
     void bvisit(const Basic &x)
     {
+        //DEBUG
+        cout << "body of void PolyGeneratorVisitor::bvisit(const Basic &x)" << endl;
         add_to_gen_set(x.rcp_from_this(), one);
     }
 };
@@ -163,8 +173,12 @@ public:
 
 umap_basic_num _find_gens_poly(const RCP<const Basic> &x)
 {
+    //DEBUG
+    cout << "body of _find_gens_poly(" << x->__str__() << ")" << endl;
     PolyGeneratorVisitor v;
-    return v.apply(*x);
+    umap_basic_num tmp = v.apply(*x);
+    cout << "returning from _find_gens_poly..." << endl;
+    return tmp;
 }
 
 umap_basic_num _find_gens_poly_pow(const RCP<const Basic> &x,

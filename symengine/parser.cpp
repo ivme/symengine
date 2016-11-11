@@ -4,6 +4,10 @@
 #include <symengine/symengine_exception.h>
 #include <cctype>
 #include <cerrno>
+//Debug
+#include <iostream>
+using std::cout;
+using std::endl;
 
 namespace SymEngine
 {
@@ -129,6 +133,8 @@ class ExpressionParser
     // parses a string from [l, r)
     RCP<const Basic> parse_string(unsigned int l, unsigned int h)
     {
+        //DEBUG
+        cout << "body of parse_string(" << l << "," << h << ")" << "where this->s ==" << s << endl;
         // the result of a particular parse from l->h
         RCP<const Basic> result;
         // start of the current expr being processed
@@ -331,6 +337,8 @@ public:
     // does all the preprocessing related to parsing
     RCP<const Basic> parse_expr(const std::string &in)
     {
+        //DEBUG
+        cout << "body of parse_expr(" << in << ")" << endl;
         // stack to maintain right brackets, to match with corresponding left
         // brackets
         std::stack<unsigned int> right_bracket;
@@ -436,8 +444,13 @@ public:
 
 RCP<const Basic> parse(const std::string &s)
 {
+    //DEBUG
+    cout << "body of parse(" << s << ")" << endl;
     ExpressionParser p;
-    return p.parse_expr(s);
+    //DEBUG -- write following as one return statement
+    RCP<const Basic> res = p.parse_expr(s);
+    cout << "returning from parse: return value is " << res->__str__() << endl;
+    return res;
 }
 
 } // SymEngine

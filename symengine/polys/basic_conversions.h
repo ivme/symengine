@@ -2,6 +2,10 @@
 #define SYMENGINE_BASIC_CONVERSIONS_H
 
 #include <symengine/visitor.h>
+//Debug
+#include <iostream>
+using std::cout;
+using std::endl;
 
 namespace SymEngine
 {
@@ -41,29 +45,44 @@ public:
     BasicToUPolyBase(const RCP<const Basic> &gen_)
     {
         gen = gen_;
+        //Debug
+        cout << "constructor of BasicToUPolyBase<>" << endl;
     }
 
     D apply(const Basic &b)
     {
+        //Debug
+        cout << "body of BasicToUPolyBase.apply(" << b.__str__() << ")" << endl;
         b.accept(*this);
+        //Debug
+        cout << "after b.accept(*this) in BasicToUPolyBase.apply(" << b.__str__() << ")" << endl;
         return std::move(dict);
     }
 
     void dict_set(unsigned int pow, const Basic &x)
     {
+        //DEBUG
+        cout << "body of BasicToUPolyBase.dict_set(" << pow << "," << x.__str__() << ")" << endl;
         static_cast<V *>(this)->dict_set(pow, x);
     }
 
     void bvisit(const Pow &x)
     {
+        //Debug
+        cout << "body of BasicToUPolyBase.bvisit(Pow &x) where x == " << x.__str__() << endl;   
         if (is_a<const Integer>(*x.get_exp())) {
+            //DEBUG
+            cout << "exponent is an Integer" << endl;
             int i = rcp_static_cast<const Integer>(x.get_exp())->as_int();
+            cout << "i == " << i << endl;
             if (i > 0) {
                 dict
                     = pow_upoly(*P::from_container(gen, _basic_to_upoly<D, P>(
                                                             x.get_base(), gen)),
                                 i)
                           ->get_poly();
+                //DEBUG
+                cout << "returning from bvisit(const Pow &x), where x == " << x.__str__() << endl;
                 return;
             }
         }
@@ -109,14 +128,26 @@ public:
 
     void bvisit(const Add &x)
     {
+        //Debug
+        int debug_i = 0;
+        cout << "body of BasicToUPolyBase.bvisit(Add &x) where x == " << x.__str__() << endl;   
         D res = apply(*x.coef_);
-        for (auto const &it : x.dict_)
+        for (auto const &it : x.dict_) {
+            //DEBUG
+            cout << debug_i << "th iteration of for loop" << endl;
+            ++debug_i;
+            cout << "*it.first == " << it.first->__str__() << "; *it.second == " << it.second->__str__() << endl;
             res += apply(*it.first) * apply(*it.second);
+        }
+        //DEBUG
+        cout << "after iteration through members of Add.dict in BasicToUPolyBase.bvisit(Add &x) where x == " << x.__str__() << endl;   
         dict = std::move(res);
     }
 
     void bvisit(const Mul &x)
     {
+        //Debug
+        cout << "body of BasicToUPolyBase.bvisit(Mul &x) where x == " << x.__str__() << endl;   
         D res = apply(*x.coef_);
         for (auto const &it : x.dict_)
             res *= apply(*pow(it.first, it.second));
@@ -125,25 +156,39 @@ public:
 
     void bvisit(const Integer &x)
     {
+        //Debug
+        cout << "body of BasicToUPolyBase.bvisit(Integer &x) where x == " << x.__str__() << endl;   
         integer_class i = x.i;
         dict = P::container_from_dict(gen, {{0, i}});
     }
 
     void bvisit(const Basic &x)
     {
+        //Debug
+        cout << "body of BasicToUPolyBase.bvisit(Basic &x) where x == " << x.__str__() << endl;   
         RCP<const Basic> genpow = one, genbase = gen, powr;
         if (is_a<const Pow>(*gen)) {
+            //Debug
+            cout << "gen is a Pow" << endl;
             genpow = rcp_static_cast<const Pow>(gen)->get_exp();
             genbase = rcp_static_cast<const Pow>(gen)->get_base();
         }
 
         if (eq(*genbase, x)) {
+            //Debug
+            cout << "genbase == x == " << x.__str__() << endl;
             powr = div(one, genpow);
             if (is_a<const Integer>(*powr)) {
+                //DEBUG
+                cout << "powr is an Integer.  powr == " << powr->__str__() << endl;
                 int i = rcp_static_cast<const Integer>(powr)->as_int();
                 if (i > 0) {
+                    //DEBUG
+                    cout << "i > 0.  i == " << i << endl;
                     dict = P::container_from_dict(
                         gen, {{i, typename P::coef_type(1)}});
+                    //DEBUG
+                    cout << "returning from BasicToUPolyBase.bvisit(Basic &x)..." << endl;
                     return;
                 }
             }
@@ -188,6 +233,8 @@ public:
 
     BasicToUExprPoly(const RCP<const Basic> &gen) : BasicToUPolyBase(gen)
     {
+        //Debug
+        cout << "constructor of BasicToUExprPoly" << endl;
     }
 
     void bvisit(const Rational &x)
@@ -205,6 +252,9 @@ template <typename T, typename P>
 enable_if_t<std::is_same<T, UExprDict>::value, T>
 _basic_to_upoly(const RCP<const Basic> &basic, const RCP<const Basic> &gen)
 {
+    //Debug
+    cout << "body of _basic_to_upoly<>(" << basic->__str__() << "," << gen->__str__() << ")" << 
+        "with std::is_same<T, UExprDict>" << endl;
     BasicToUExprPoly v(gen);
     return v.apply(*basic);
 }
@@ -213,6 +263,9 @@ template <typename T, typename P>
 enable_if_t<std::is_base_of<UIntPolyBase<T, P>, P>::value, T>
 _basic_to_upoly(const RCP<const Basic> &basic, const RCP<const Basic> &gen)
 {
+    //Debug
+    cout << "body of _basic_to_upoly<>(" << basic->__str__() << "," << gen->__str__() << ")" << 
+        "with std::is_base_of<UIntPolyBase<T, P>, P>" << endl;
     BasicToUIntPoly<P> v(gen);
     return v.apply(*basic);
 }
@@ -221,6 +274,8 @@ template <typename P>
 RCP<const P> from_basic(const RCP<const Basic> &basic,
                         const RCP<const Basic> &gen, bool ex)
 {
+    //Debug
+    cout << "body of from_basic<>(" << basic->__str__() << "," << gen->__str__() << "," << ex << ")" << endl;
     RCP<const Basic> exp = basic;
     if (ex)
         exp = expand(basic);
@@ -233,6 +288,8 @@ enable_if_t<std::is_base_of<UPolyBase<typename P::container_type, P>, P>::value,
             RCP<const P>>
 from_basic(const RCP<const Basic> &basic, bool ex)
 {
+    //Debug
+    cout << "body of from_basic<>(" << basic->__str__() << "," << ex << ")" << endl;
     RCP<const Basic> exp = basic;
     if (ex)
         exp = expand(basic);
@@ -472,6 +529,8 @@ template <typename P>
 RCP<const P> from_basic(const RCP<const Basic> &basic, set_basic &gens,
                         bool ex = false)
 {
+    //Debug
+    cout << "body of from_basic<>(" << basic->__str__() << "," << ex << "), line 512 of basic_conversions.h" << endl;
     RCP<const Basic> exp = basic;
     if (ex)
         exp = expand(basic);
@@ -486,11 +545,14 @@ enable_if_t<std::is_base_of<MSymEnginePoly<typename P::container_type, P>,
             RCP<const P>>
 from_basic(const RCP<const Basic> &basic, bool ex = false)
 {
+    //Debug
+    cout << "body of from_basic<>(" << basic->__str__() << "," << ex << "), line 528 of basic_conversions.h" << endl;
     RCP<const Basic> exp = basic;
     if (ex)
         exp = expand(basic);
 
     umap_basic_num tmp = _find_gens_poly(exp);
+    cout << "after _find_gens_poly in from_basic" << endl;
     set_basic gens;
     for (auto it : tmp)
         gens.insert(pow(it.first, it.second));

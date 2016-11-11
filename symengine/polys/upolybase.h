@@ -22,6 +22,11 @@ using fq_t = SymEngine::fmpq_wrapper;
 #include <piranha/mp_rational.hpp>
 #endif
 
+//DEBUG
+#include <iostream>
+using std::cout;
+using std::endl;
+
 namespace SymEngine
 {
 // misc methods
@@ -215,6 +220,8 @@ public:
 
     static Wrapper mul(const Wrapper &a, const Wrapper &b)
     {
+        //DEBUG
+        cout << "body of ODictWrapper::mul(const Wrapper &a, const Wrapper &b)" << endl;
         if (a.get_dict().empty())
             return a;
         if (b.get_dict().empty())
@@ -224,7 +231,7 @@ public:
         for (const auto &i1 : a.dict_)
             for (const auto &i2 : b.dict_)
                 p.dict_[i1.first + i2.first] += i1.second * i2.second;
-
+        cout << "after first for loop in ODictWrapper::mul(const Wrapper &a, const Wrapper &b)" << endl;
         for (auto it = p.dict_.cbegin(); it != p.dict_.cend();) {
             if (it->second == 0) {
                 p.dict_.erase(it++);
@@ -237,24 +244,41 @@ public:
 
     static Wrapper pow(const Wrapper &a, unsigned int p)
     {
+        //DEBUG
+        cout << "body of pow(const Wrapper &a, unsigned int p) in upolybase.h" << endl;
         Wrapper tmp = a, res(1);
 
         while (p != 1) {
+            //DEBUG
+            cout << "p == " << p << endl; 
             if (p % 2 == 0) {
-                tmp = tmp * tmp;
+                //DEBUG
+                cout << "p mod 2 == 0" << endl;
+                Wrapper tmp2;
+                tmp2 = tmp * tmp;
+                cout << "after tmp2 = tmp * tmp" << endl;
+                tmp = tmp2;
+                cout << "after tmp = tmp2" << endl;
             } else {
+                //DEBUG
+                cout << "p mod 2 != 0" << endl;
                 res = res * tmp;
                 tmp = tmp * tmp;
             }
+            cout << "dividing p by 2 via shift" << endl;
             p >>= 1;
         }
-
+        //DEBUG
+        cout << "returning from pow(const Wrapper &a, unsigned int p)" << endl;
         return (res * tmp);
     }
 
     friend Wrapper operator*(const Wrapper &a, const Wrapper &b)
-    {
-        return Wrapper::mul(a, b);
+    {   
+        cout << "operator*(const Wrapper &a, const Wrapper &b) in upolybase.h" << endl;
+        Wrapper tmp = Wrapper::mul(a, b);
+        cout << "returning from operator*(const Wrapper &a, const Wrapper &b)" << endl;
+        return tmp;
     }
 
     Wrapper &operator*=(const Wrapper &other)
@@ -380,6 +404,8 @@ public:
     static RCP<const Poly> from_container(const RCP<const Basic> &var,
                                           Container &&d)
     {
+        //DEBUG
+        cout << "body of from_container(const RCP<const Basic> &var, Container &&d), where var == " << var->__str__() << endl;
         return make_rcp<const Poly>(var, std::move(d));
     }
 };
@@ -660,7 +686,6 @@ RCP<const Poly> sub_upoly(const Poly &a, const Poly &b)
 {
     if (!(a.get_var()->__eq__(*b.get_var())))
         throw SymEngineException("Error: variables must agree.");
-
     auto dict = a.get_poly();
     dict -= b.get_poly();
     return Poly::from_container(a.get_var(), std::move(dict));
@@ -680,7 +705,10 @@ RCP<const Poly> mul_upoly(const Poly &a, const Poly &b)
 template <typename Poly>
 RCP<const Poly> pow_upoly(const Poly &a, unsigned int p)
 {
+    //DEBUG
+    cout << "body of pow_upoly(" << a.__str__() << "," << p << ")" << endl;
     auto dict = Poly::container_type::pow(a.get_poly(), p);
+    cout << "after auto dict = Poly..." << endl;
     return Poly::from_container(a.get_var(), std::move(dict));
 }
 

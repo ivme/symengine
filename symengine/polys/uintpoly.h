@@ -6,6 +6,10 @@
 #define SYMENGINE_UINTPOLY_H
 
 #include <symengine/polys/usymenginepoly.h>
+//DEBUG
+#include <iostream>
+using std::cout;
+using std::endl;
 
 namespace SymEngine
 {
@@ -27,6 +31,7 @@ class UIntDict : public ODictWrapper<unsigned int, integer_class, UIntDict>
 public:
     UIntDict() SYMENGINE_NOEXCEPT
     {
+        cout << "UIntDict()" << endl;
     }
     ~UIntDict() SYMENGINE_NOEXCEPT
     {
@@ -34,19 +39,38 @@ public:
     UIntDict(UIntDict &&other) SYMENGINE_NOEXCEPT
         : ODictWrapper(std::move(other))
     {
+        cout << "UIntDict(UIntDict &&other)" << endl;
     }
     UIntDict(const int &i) : ODictWrapper(i)
     {
+        cout << "UIntDict(const int &i)" << endl;
     }
     UIntDict(const map_uint_mpz &p) : ODictWrapper(p)
     {
+        cout << "UIntDict(const map_uint_mpz &p)" << endl;
     }
     UIntDict(const integer_class &i) : ODictWrapper(i)
     {
+        cout << "UIntDict(const integer_class &i)" << endl;
     }
 
-    UIntDict(const UIntDict &) = default;
-    UIntDict &operator=(const UIntDict &) = default;
+    UIntDict(const UIntDict &other) : ODictWrapper(other)
+    {
+        cout << "UIntDict(const UIntDict &)" << endl;
+    }
+    
+    UIntDict &operator=(const UIntDict &other) {
+        cout << "assignment operator UIntDict::operator=(const UIntDict &)" << endl;
+        cout << "this == " << this << endl;
+        cout << "&other == " << &other << endl;
+        cout << "this == &other: " << std::boolalpha << (this == &other) << endl;
+        cout << "&(this->dict_) == " << &(this->dict_) << endl;
+        cout << "&(other.dict_) == " << &(other.dict_) << endl;
+        cout << "&(this->dict_) == &(other.dict_): " << (&(this->dict_) == &(other.dict_)) << endl;
+        this->dict_ = other.dict_;
+        cout << "after this->dict_ = other.dict_;" << endl;
+        return *this;
+    }
 
     //! Evaluates the dict_ at value 2**x
     integer_class eval_bit(const unsigned int &x) const
@@ -66,6 +90,8 @@ public:
 
     static UIntDict mul(const UIntDict &a, const UIntDict &b)
     {
+        //DEBUG
+        cout << "body of UIntDict::mul(const UIntDict &a, const UIntDict &b)" << endl;
         int mul = 1;
 
         unsigned int N = bit_length(std::min(a.degree() + 1, b.degree() + 1))
@@ -84,22 +110,34 @@ public:
         unsigned int deg = 0, carry = 0;
         UIntDict r;
 
+        //DEBUG
+        cout << "before while loop in UIntDict::mul" << endl;
         while (s_val != 0 or carry != 0) {
+            cout << "mp_and(" << temp << "," << s_val << "," << mask << ")" << endl;
             mp_and(temp, s_val, mask);
             if (temp < thresh) {
+                cout << "temp < thresh: temp == " << temp << ", thresh == " << thresh << endl;
                 res = mul * (temp + carry);
-                if (res != 0)
+                if (res != 0) {
+                    //DEBUG
+                    cout << "deg == " << deg << endl;
                     r.dict_[deg] = res;
+                    cout << "after r.dic_[deg] = res;" << endl;
+                }
                 carry = 0;
             } else {
+                cout << "temp >= thresh: temp == " << temp << ", thresh == " << thresh << endl;
                 res = mul * (temp - full + carry);
                 if (res != 0)
                     r.dict_[deg] = res;
                 carry = 1;
             }
+            cout << "s_val == " << s_val << endl;
             s_val >>= N;
+            cout << "after s_val >>= N" << endl;
             deg++;
         }
+        cout << "returning from UIntDict::mul..." << endl;
         return r;
     }
 

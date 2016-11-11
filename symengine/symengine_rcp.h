@@ -24,6 +24,10 @@
 
 #endif
 
+//Debug
+using std::cout;
+using std::endl;
+
 namespace SymEngine
 {
 
@@ -39,15 +43,18 @@ class Ptr
 public:
     inline explicit Ptr(T *ptr) : ptr_(ptr)
     {
+        cout << "Ptr(T *ptr)" << endl;
         SYMENGINE_ASSERT(ptr_ != nullptr)
     }
     inline Ptr(const Ptr<T> &ptr) : ptr_(ptr.ptr_)
     {
+        cout << "Ptr(const Ptr<T> &ptr)" << endl;
     }
     template <class T2>
     inline Ptr(const Ptr<T2> &ptr)
         : ptr_(ptr.get())
     {
+        cout << "Ptr(const Ptr<T2> &ptr)" << endl;
     }
     Ptr<T> &operator=(const Ptr<T> &ptr)
     {
@@ -111,15 +118,18 @@ class RCP
 public:
     RCP(ENull null_arg = null) : ptr_(nullptr)
     {
+        cout << "RCP(ENull null_arg = null)" << endl;
     }
     explicit RCP(T *p) : ptr_(p)
     {
+        cout << "explicit RCP(T *p)" << endl;
         SYMENGINE_ASSERT(ptr_ != nullptr)
         (ptr_->refcount_)++;
     }
     // Copy constructor
     RCP(const RCP<T> &rp) : ptr_(rp.ptr_)
     {
+        cout << "RCP(const RCP<T> &rp)" << endl;
         if (not is_null())
             (ptr_->refcount_)++;
     }
@@ -128,12 +138,14 @@ public:
     RCP(const RCP<T2> &r_ptr)
         : ptr_(r_ptr.get())
     {
+        cout << "RCP(const RCP<T2> &r_ptr)" << endl;
         if (not is_null())
             (ptr_->refcount_)++;
     }
     // Move constructor
     RCP(RCP<T> &&rp) SYMENGINE_NOEXCEPT : ptr_(rp.ptr_)
     {
+        cout << "RCP(RCP<T> &&rp)" << endl;
         rp.ptr_ = nullptr;
     }
     // Move constructor
@@ -141,6 +153,7 @@ public:
     RCP(RCP<T2> &&r_ptr)
     SYMENGINE_NOEXCEPT : ptr_(r_ptr.get())
     {
+        cout << "RCP(RCP<T2> &&r_ptr)" << endl;
         r_ptr._set_null();
     }
     ~RCP() SYMENGINE_NOEXCEPT

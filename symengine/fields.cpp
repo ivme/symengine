@@ -735,10 +735,6 @@ GaloisFieldDict::gf_edf_zassenhaus(const unsigned &n) const
         auto r = gf_random(2 * n - 1, state);
         #else
         auto r = gf_random(2 * n - 1, mt);
-<<<<<<< HEAD
-        cout << "r = " << r.__str__() << endl;
-=======
->>>>>>> boostmp
         #endif
         GaloisFieldDict g;
         if (modulo_ == 2_z) {
