@@ -532,6 +532,9 @@ if (BUILD_BENCHMARKS)
     add_subdirectory(benchmarks)
 endif()
 
+# debug segfaults that appear in Release mode but not Debug mode
+set(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_RELEASE})
+
 # At the end we print a nice summary
 
 message("--------------------------------------------------------------------------------")
