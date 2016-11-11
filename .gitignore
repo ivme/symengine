@@ -103,6 +103,24 @@ symengine/tests/logic/test_logic
 symengine/tests/printing/test_ccode
 symengine/tests/finitediff/test_finitediff
 symengine/tests/basic/test_integer_class
+symengine/tests/basic/test_debug
+symengine/tests/debugging/cdict_cdefault
+symengine/tests/debugging/cdict_cdict
+symengine/tests/debugging/cdict_cdict2
+symengine/tests/debugging/cdict_cint
+symengine/tests/debugging/cdict_cmap
+symengine/tests/debugging/cdict_dict_map1
+symengine/tests/debugging/cdict_dict_map2
+symengine/tests/debugging/cdict_uintdict_map1
+symengine/tests/debugging/cint_cdict
+symengine/tests/debugging/cint_cint
+symengine/tests/debugging/cint_cmap
+symengine/tests/debugging/cmap_cdict
+symengine/tests/debugging/cmap_cint
+symengine/tests/debugging/cmap_cmap
+symengine/tests/debugging/cmap_dict_map1
+symengine/tests/debugging/cmap_dict_map2
+symengine/tests/debugging/cmap_uintdict_map1
 
 # Benchmarks executables
 benchmarks/add1
