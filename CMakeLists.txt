@@ -454,6 +454,9 @@ if ((NOT WITH_SYMENGINE_RCP) OR HAVE_TEUCHOS_BFD)
     set(WITH_SYMENGINE_TEUCHOS yes)
 endif()
 
+# debug segfaults that appear in Release mode but not Debug mode
+set(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_RELEASE})
+
 enable_testing()
 add_subdirectory(symengine)
 
@@ -531,9 +534,6 @@ file(COPY ${symengine_SOURCE_DIR}/cmake/ DESTINATION ${symengine_BINARY_DIR}/cma
 if (BUILD_BENCHMARKS)
     add_subdirectory(benchmarks)
 endif()
-
-# debug segfaults that appear in Release mode but not Debug mode
-set(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_RELEASE})
 
 # At the end we print a nice summary
 
