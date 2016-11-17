@@ -434,6 +434,17 @@ CWRAPPER_OUTPUT_TYPE complex_double_imaginary_part(basic s, const basic com)
     CWRAPPER_END
 }
 
+dcomplex complex_double_get(const basic s)
+{
+    SYMENGINE_ASSERT(is_a<ComplexDouble>(*(s->m)));
+    dcomplex d;
+    d.real = (static_cast<const ComplexDouble &>(*(s->m)).as_complex_double())
+                 .real();
+    d.imag = (static_cast<const ComplexDouble &>(*(s->m)).as_complex_double())
+                 .imag();
+    return d;
+}
+
 CWRAPPER_OUTPUT_TYPE basic_diff(basic s, const basic expr, basic const symbol)
 {
     if (not is_a_Symbol(symbol))
@@ -566,6 +577,51 @@ char *basic_str(const basic s)
 void basic_str_free(char *s)
 {
     delete[] s;
+}
+
+int symengine_have_component(const char *c)
+{
+#ifdef HAVE_SYMENGINE_MPFR
+    if (std::strcmp("mpfr", c) == 0)
+        return 1;
+#endif
+#ifdef HAVE_SYMENGINE_MPC
+    if (std::strcmp("mpc", c) == 0)
+        return 1;
+#endif
+#ifdef HAVE_SYMENGINE_FLINT
+    if (std::strcmp("flint", c) == 0)
+        return 1;
+#endif
+#ifdef HAVE_SYMENGINE_ARB
+    if (std::strcmp("arb", c) == 0)
+        return 1;
+#endif
+#ifdef HAVE_SYMENGINE_ECM
+    if (std::strcmp("ecm", c) == 0)
+        return 1;
+#endif
+#ifdef HAVE_SYMENGINE_PRIMESIEVE
+    if (std::strcmp("primesieve", c) == 0)
+        return 1;
+#endif
+#ifdef HAVE_SYMENGINE_PIRANHA
+    if (std::strcmp("piranha", c) == 0)
+        return 1;
+#endif
+#ifdef HAVE_SYMENGINE_BOOST
+    if (std::strcmp("boost", c) == 0)
+        return 1;
+#endif
+#ifdef HAVE_SYMENGINE_PTHREAD
+    if (std::strcmp("pthread", c) == 0)
+        return 1;
+#endif
+#ifdef HAVE_SYMENGINE_LLVM
+    if (std::strcmp("llvm", c) == 0)
+        return 1;
+#endif
+    return 0;
 }
 
 int is_a_Number(const basic s)

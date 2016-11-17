@@ -39,6 +39,13 @@ typedef enum {
     SYMENGINE_TypeID_Count
 } TypeID;
 
+//! Struct to hold the real and imaginary parts of std::complex<double>
+//! extracted from basic
+typedef struct dcomplex {
+    double real;
+    double imag;
+} dcomplex;
+
 // The size of 'CRCPBasic_C' must be the same as CRCPBasic (which contains a
 // single RCP<const Basic> member) *and* they must have the same alignment
 // (because we allocate CRCPBasic into the memory occupied by this struct in
@@ -202,6 +209,10 @@ CWRAPPER_OUTPUT_TYPE complex_double_real_part(basic s, const basic com);
 //! Assign to s, an imaginary double where com is a complex double
 CWRAPPER_OUTPUT_TYPE complex_double_imaginary_part(basic s, const basic com);
 
+//! Extract the real and imaginary doubles from the std::complex<double> stored
+//! in basic
+dcomplex complex_double_get(const basic s);
+
 //! Assigns s = a + b.
 CWRAPPER_OUTPUT_TYPE basic_add(basic s, const basic a, const basic b);
 //! Assigns s = a - b.
@@ -299,6 +310,16 @@ CWRAPPER_OUTPUT_TYPE basic_gamma(basic s, const basic a);
 char *basic_str(const basic s);
 //! Frees the string s
 void basic_str_free(char *s);
+
+//! Returns 1 if a specific component is installed and 0 if not.
+//! Component can be "mpfr", "flint", "arb", "mpc", "ecm", "primesieve",
+//! "piranha", "boost", "pthread" or "llvm" (all in lowercase).
+//! This function, using string comparison, was implemented for particular
+//! libraries that do not provide header access (i.e. SymEngine.jl
+//! and other related shared libraries).
+//! Avoid usage while having access to the headers. Instead simply use
+//! HAVE_SYMENGINE_MPFR and other related macros directly.
+int symengine_have_component(const char *c);
 
 //! Return 1 if s is a Number, 0 if not.
 int is_a_Number(const basic s);
