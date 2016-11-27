@@ -3,7 +3,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef HAVE_SYMENGINE_GMP
 #include <gmp.h>
+#endif
 
 #include "symengine/symengine_config.h"
 
@@ -141,7 +143,9 @@ CWRAPPER_OUTPUT_TYPE integer_set_si(basic s, long i);
 //! Assign to s, a ulong.
 CWRAPPER_OUTPUT_TYPE integer_set_ui(basic s, unsigned long i);
 //! Assign to s, a mpz_t.
+#ifdef HAVE_SYMENGINE_GMP
 CWRAPPER_OUTPUT_TYPE integer_set_mpz(basic s, const mpz_t i);
+#endif
 //! Assign to s, an integer that has base 10 representation c.
 CWRAPPER_OUTPUT_TYPE integer_set_str(basic s, const char *c);
 //! Assign to s, a real_double that has value of d.
@@ -181,7 +185,9 @@ signed long integer_get_si(const basic s);
 //! Returns unsigned long value of s.
 unsigned long integer_get_ui(const basic s);
 //! Returns s as a mpz_t.
+#ifdef HAVE_SYMENGINE_GMP
 CWRAPPER_OUTPUT_TYPE integer_get_mpz(mpz_t a, const basic s);
+#endif
 
 //! Assign to s, a rational i/j. Returns 0 if either i or j is not an integer.
 CWRAPPER_OUTPUT_TYPE rational_set(basic s, const basic i, const basic j);
@@ -189,17 +195,21 @@ CWRAPPER_OUTPUT_TYPE rational_set(basic s, const basic i, const basic j);
 CWRAPPER_OUTPUT_TYPE rational_set_si(basic s, long i, long j);
 //! Assign to s, a rational i/j, where i and j are unsigned longs.
 CWRAPPER_OUTPUT_TYPE rational_set_ui(basic s, unsigned long i, unsigned long j);
+#ifdef HAVE_SYMENGINE_GMP
 //! Returns s as a mpq_t.
 CWRAPPER_OUTPUT_TYPE rational_get_mpq(mpq_t a, const basic s);
 //! Assign to s, a rational i, where is of type mpq_t.
 CWRAPPER_OUTPUT_TYPE rational_set_mpq(basic s, const mpq_t i);
+#endif
 
 //! Assign to s, a complex re + i*im.
 CWRAPPER_OUTPUT_TYPE complex_set(basic s, const basic re, const basic im);
 //! Assign to s, a complex re + i*im, where re and im are rationals.
 CWRAPPER_OUTPUT_TYPE complex_set_rat(basic s, const basic re, const basic im);
+#ifdef HAVE_SYMENGINE_GMP
 //! Assign to s, a complex re + i*im, where re and im are of type mpq.
 CWRAPPER_OUTPUT_TYPE complex_set_mpq(basic s, const mpq_t re, const mpq_t im);
+#endif
 //! Assign to s, a real where com is a complex
 CWRAPPER_OUTPUT_TYPE complex_real_part(basic s, const basic com);
 //! Assign to s, an imaginary where com is a complex
@@ -367,8 +377,8 @@ typedef struct CVecBasic CVecBasic;
 
 CVecBasic *vecbasic_new();
 void vecbasic_free(CVecBasic *self);
-void vecbasic_push_back(CVecBasic *self, const basic value);
-void vecbasic_get(CVecBasic *self, int n, basic result);
+CWRAPPER_OUTPUT_TYPE vecbasic_push_back(CVecBasic *self, const basic value);
+CWRAPPER_OUTPUT_TYPE vecbasic_get(CVecBasic *self, size_t n, basic result);
 size_t vecbasic_size(CVecBasic *self);
 
 //! Wrappers for Matrices
@@ -553,18 +563,39 @@ char *ascii_art_str();
 CWRAPPER_OUTPUT_TYPE ntheory_gcd(basic s, const basic a, const basic b);
 //! Least Common Multiple
 CWRAPPER_OUTPUT_TYPE ntheory_lcm(basic s, const basic a, const basic b);
+//! Extended GCD
+CWRAPPER_OUTPUT_TYPE ntheory_gcd_ext(basic g, basic s, basic t, const basic a,
+                                     const basic b);
 //! \return next prime after `a`
 CWRAPPER_OUTPUT_TYPE ntheory_nextprime(basic s, const basic a);
 //! modulo round toward zero
 CWRAPPER_OUTPUT_TYPE ntheory_mod(basic s, const basic n, const basic d);
 //! \return quotient round toward zero when `n` is divided by `d`
 CWRAPPER_OUTPUT_TYPE ntheory_quotient(basic s, const basic n, const basic d);
+//! \return modulo and quotient round toward zero
+CWRAPPER_OUTPUT_TYPE ntheory_quotient_mod(basic q, basic r, const basic n,
+                                          const basic d);
+//! modulo round toward -inf
+CWRAPPER_OUTPUT_TYPE ntheory_mod_f(basic s, const basic n, const basic d);
+//! \return quotient round toward -inf when `n` is divided by `d`
+CWRAPPER_OUTPUT_TYPE ntheory_quotient_f(basic s, const basic n, const basic d);
+//! \return modulo and quotient round toward -inf
+CWRAPPER_OUTPUT_TYPE ntheory_quotient_mod_f(basic q, basic r, const basic n,
+                                            const basic d);
+//! inverse modulo
+int ntheory_mod_inverse(basic b, const basic a, const basic m);
 //! nth Fibonacci number //  fibonacci(0) = 0 and fibonacci(1) = 1
 CWRAPPER_OUTPUT_TYPE ntheory_fibonacci(basic s, unsigned long a);
+//! Fibonacci n and n-1
+CWRAPPER_OUTPUT_TYPE ntheory_fibonacci2(basic g, basic s, unsigned long a);
 //! Lucas number
 CWRAPPER_OUTPUT_TYPE ntheory_lucas(basic s, unsigned long a);
+//! Lucas number n and n-1
+CWRAPPER_OUTPUT_TYPE ntheory_lucas2(basic g, basic s, unsigned long a);
 //! Binomial Coefficient
 CWRAPPER_OUTPUT_TYPE ntheory_binomial(basic s, const basic a, unsigned long b);
+//! Factorial
+CWRAPPER_OUTPUT_TYPE ntheory_factorial(basic s, unsigned long n);
 //! Evaluate b and assign the value to s
 CWRAPPER_OUTPUT_TYPE basic_evalf(basic s, const basic b, unsigned long bits,
                                  int real);
